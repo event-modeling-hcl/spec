@@ -1,4 +1,4 @@
-# Event Modeling HCL Specification v0.2.0 (Draft)
+# Event Modeling HCL Specification v0.2.0-rc.1 (Release Candidate)
 
 ## Status and Scope
 
@@ -7,7 +7,7 @@ one `.em.hcl` document. The upstream [Event Modeling
 Specification](https://github.com/dilgerma/event-modeling-spec) remains the
 domain reference.
 
-v0.2.0 is a breaking revision from v0.1.0 that makes flow and State View scenarios
+v0.2.0-rc.1 is the release candidate for a breaking revision from v0.1.0 that makes flow and State View scenarios
 canonical, makes human-facing titles optional, adds stable diagnostics and
 validation profiles, and defines a typed semantic model for downstream tools.
 

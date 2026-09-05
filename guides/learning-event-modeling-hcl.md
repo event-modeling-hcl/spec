@@ -3,7 +3,7 @@
 
 > **Target:** after working through this guide, you should be able to run an Event Modeling conversation, identify the four slice patterns, encode the result as a valid `.em.hcl` document, and turn each important slice into precise pattern-specific scenarios (Given/When/Then for State Change; Given/Then for State View).
 >
-> **Normative language version:** Event Modeling HCL Specification **v0.2.0 (Draft)**.
+> **Normative language version:** Event Modeling HCL Specification **v0.2.0-rc.1 (Release Candidate)**.
 
 ---
 
@@ -1939,8 +1939,8 @@ translation "workflow_id" {
 
 - **Event Modeling Cheat Sheet**, Nebulit / eventmodelers.ai: https://eventmodelers.ai/cheatsheet/
 - **Event Modeling Cheat Sheet PDF** supplied with this guide request.
-- **Event Modeling HCL Specification v0.2.0 (Draft)** supplied with the schema update. This is treated as the normative source for `.em.hcl` syntax, canonical flow, scenario rules, diagnostics, validation profiles, formatting, and typed IR behavior.
-- **Migrating to the v0.2.0 Draft** supplied with the schema update informed the before/after authoring guidance.
+- **Event Modeling HCL Specification v0.2.0-rc.1 (Release Candidate)** supplied with the schema update. This is treated as the normative source for `.em.hcl` syntax, canonical flow, scenario rules, diagnostics, validation profiles, formatting, and typed IR behavior.
+- **Migrating to v0.2.0-rc.1** supplied with the schema update informed the before/after authoring guidance.
 - The supplied `complete.em.hcl` is used as a current executable reference for canonical flow and model structure.
 
 ## Learning-science sources retrieved through SciSpace

@@ -4,9 +4,9 @@ All notable changes to this project are documented in this file.
 
 
 
-## [v0.2.0] - 2026-09-02
+## [v0.2.0-rc.1] - 2026-09-05
 
-v0.2.0 was a breaking redesign for native HCL authoring. Models written for
+v0.2.0-rc.1 is the release candidate for a breaking redesign for native HCL authoring. Models written for
 v0.1.0 were not compatible.
 
 ### Added
@@ -42,7 +42,7 @@ v0.1.0 were not compatible.
   and scenario targets.
 - Native HCL examples are checked against their effective field type and
   cardinality.
-- All shipped examples now use the v0.2.0 draft syntax.
+- All shipped examples now use the v0.2.0-rc.1 syntax.
 - Flow edges have one canonical spelling; reverse forms fail validation.
 - State View scenarios use one or more event `given` steps followed by `then`
   read-model steps, with no `when`.
