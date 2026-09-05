@@ -3,7 +3,7 @@
 The authoritative specification for Event Modeling HCL v0.2.0-rc.1, a native HCL
 language for expressing Event Modeling workflows as validated source files.
 
-This repository defines the language. The [Go implementation](https://github.com/event-modeling-hcl/event-modeling-hcl)
+This repository defines the language. The [Go implementation](https://github.com/event-modeling-hcl/eventmodeling-hcl)
 provides the `eventmodeling-hcl` validator, formatter, and typed IR that enforce
 and consume it.
 
@@ -33,4 +33,4 @@ eventmodeling-hcl validate examples/state-change.em.hcl
 The specification is licensed under [Apache-2.0](LICENSE). Event Modeling
 concepts are informed by the upstream [Event Modeling
 Specification](https://github.com/dilgerma/event-modeling-spec) and Martin
-Dilger's Event Modeling Cheat Sheet.
+Dilger's [Event Modeling Cheat Sheet](https://eventmodelers.ai/cheatsheet/).
