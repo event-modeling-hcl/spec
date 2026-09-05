@@ -1,50 +1,43 @@
-# ADR 0002: HCL-Native Surface and Reference Resolution (v0.2.0)
+# ADR 0002: Native Event Modeling HCL Language
 
 ## Status
 
-Superseded by [ADR 0003](0003-bounded-context-contracts.md) for event and
-field ownership. The HCL-native syntax decisions remain accepted.
+Accepted for v0.2.0-rc.1.
 
 ## Context
 
-v0.1.0 was a mechanical port of the upstream JSON schema. It read as "JSON in
-HCL clothing": `type = "COMMAND"` restated the block keyword, `example` values
-were stringified (`"1"`, `"null"`), relationships were denormalized
-`dependency` blocks that repeated the target's title and kind on both
-endpoints, and ordering integers (`index`, `spec_row`) were written by hand.
-The upstream schema enforces neither id uniqueness nor referential integrity,
-so the ported model was also weaker than it could be. Because the validator is
-purely structural HCL — no JSON marshalling — the surface can be redesigned and
-strengthened at low cost.
+v0.1.0 mechanically mirrored an upstream JSON schema. That made `.em.hcl`
+verbose, allowed equivalent flow spellings, kept event contracts inside slices,
+and gave tools only raw HCL. Event Modeling needs a compact, checkable language
+that keeps domain contracts, workflows, and workshop decisions explicit.
 
 ## Decision
 
-v0.2.0 is a clean break with no dual-syntax support. The `.em.hcl` file is the
-source of truth, so data that is derivable is dropped rather than preserved for
-JSON round-tripping:
+v0.2 is a clean break with no compatibility syntax:
 
-- An element's kind is its block keyword; the `type` attribute is removed.
-- Relationships are `inbound`/`outbound` reference-list attributes. Each edge is
-  written once; the target's title and kind are recovered by resolving the id.
-- `field.example` values are native HCL literals, checked for consistency with
-  the field's `type`.
-- `given`/`when`/`then` steps are unlabeled and positional; `given`/`when`
-  infer their type; `then` states it; step `linkedId` becomes `ref`.
-- `index`, `spec_row`, and `sliceName` are derived and removed.
-
-The validator now enforces two invariants the upstream schema omits: element
-ids are unique across the document, and `inbound`/`outbound`/`linked_id`
-references must resolve to a declared element or slice. A step's `ref` is not
-required to resolve, because `given` prerequisites frequently originate in
-slices outside the document under validation.
+- HCL block kinds represent Event Modeling concepts. Bounded contexts own
+  aggregates, reusable field types, and canonical event contracts; workflows
+  are first-class State Change, State View, Automation, or Translation blocks.
+- Relationships use typed, unquoted HCL traversals. Every flow edge has one
+  source-oriented spelling; reverse forms are errors.
+- Fields use native HCL literals and either a built-in type or a context-owned
+  `field_type`. Labels are lower snake case identities, source order is model
+  order, and titles are optional derived presentation values.
+- Scenarios are workflow-local Given/When/Then steps with pattern-specific
+  target rules. State Views have one or more `given` events and `then` a read
+  model; they have no `when` or synthetic `query` step.
+- Actors, ownership, chapters, and hotspots preserve workshop information.
+  Objective rules are errors; judgment-dependent smells remain diagnostics.
+- Validation runs against HCL for precise source ranges. Clean input decodes to
+  a normalized typed IR with effective titles and one source-to-target edge
+  list; formatting canonicalizes layout without changing semantic order.
 
 ## Consequences
 
-- Hand authoring is markedly terser and less error-prone; the pet-management
-  model roughly halves in size.
-- The model is a checkable graph: dangling references, duplicate ids, and
-  wrong-typed examples are reported with source locations.
-- Cross-file resolution, formatting, and JSON conversion remain out of scope.
-- The `dependency` block, element `type` attribute, and the derived attributes
-  are no longer part of the language; ADR 0001's opaque-reference stance no
-  longer applies.
+- Models are concise, canonical, and directly express the four Event Modeling
+  patterns.
+- The validator can resolve and kind-check relationships while retaining a
+  clear boundary for human judgment.
+- Downstream renderers and generators consume the typed IR rather than raw HCL.
+- v0.1 models require migration; the normative specification defines the
+  complete syntax and compatibility rules.
