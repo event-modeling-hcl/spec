@@ -3,7 +3,7 @@
 
 > **Target:** after working through this guide, you should be able to run an Event Modeling conversation, identify the four slice patterns, encode the result as a valid `.em.hcl` document, and turn each important slice into precise pattern-specific scenarios (Given/When/Then for State Change; Given/Then for State View).
 >
-> **Normative language version:** Event Modeling HCL Specification **v0.2.0-rc.1 (Release Candidate)**.
+> **Normative language version:** Event Modeling HCL Specification **v0.2.0**.
 
 ---
 
@@ -1722,12 +1722,12 @@ Answer aloud:
 ## 54. Scenarios
 
 - [ ] Every important slice has scenarios.
-- [ ] Exactly one `when` per scenario.
+- [ ] `when` cardinality matches the pattern (State Change and Automation/Translation: exactly one; State View: none).
 - [ ] At least one `then`.
 - [ ] Happy path exists.
 - [ ] Important error/business-rule path exists.
 - [ ] State Change: When -> Command.
-- [ ] State View: When -> Query/Read Model.
+- [ ] State View: Given Event(s) -> Then Read Model (no `when`, no `query`).
 - [ ] Automation/Translation: machine action is modeled with Processor/Command targets.
 - [ ] Semantic notes use `comment` blocks.
 
@@ -1939,8 +1939,8 @@ translation "workflow_id" {
 
 - **Event Modeling Cheat Sheet**, Nebulit / eventmodelers.ai: https://eventmodelers.ai/cheatsheet/
 - **Event Modeling Cheat Sheet PDF** supplied with this guide request.
-- **Event Modeling HCL Specification v0.2.0-rc.1 (Release Candidate)** supplied with the schema update. This is treated as the normative source for `.em.hcl` syntax, canonical flow, scenario rules, diagnostics, validation profiles, formatting, and typed IR behavior.
-- **Migrating to v0.2.0-rc.1** supplied with the schema update informed the before/after authoring guidance.
+- **Event Modeling HCL Specification v0.2.0** supplied with the schema update. This is treated as the normative source for `.em.hcl` syntax, canonical flow, scenario rules, diagnostics, validation profiles, formatting, and typed IR behavior.
+- **Migrating to v0.2.0** supplied with the schema update informed the before/after authoring guidance.
 - The supplied `complete.em.hcl` is used as a current executable reference for canonical flow and model structure.
 
 ## Learning-science sources retrieved through SciSpace

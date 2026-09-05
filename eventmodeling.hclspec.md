@@ -1,4 +1,4 @@
-# Event Modeling HCL Specification v0.2.0-rc.1 (Release Candidate)
+# Event Modeling HCL Specification v0.2.0
 
 ## Status and Scope
 
@@ -7,9 +7,9 @@ one `.em.hcl` document. The upstream [Event Modeling
 Specification](https://github.com/dilgerma/event-modeling-spec) remains the
 domain reference.
 
-v0.2.0-rc.1 is the release candidate for a breaking revision from v0.1.0 that makes flow and State View scenarios
-canonical, makes human-facing titles optional, adds stable diagnostics and
-validation profiles, and defines a typed semantic model for downstream tools.
+v0.2.0 is a breaking revision from v0.1.0 that makes flow and State View
+scenarios canonical, makes human-facing titles optional, adds stable diagnostics
+and validation profiles, and defines a typed semantic model for downstream tools.
 
 ```text
 eventmodeling-hcl validate [--profile workshop|valid|strict] <model.em.hcl>
@@ -118,6 +118,11 @@ such as `aggregate`, `api_endpoint`, `external_trigger`, `triggers`, and
 `service`. A read model additionally requires `question`; a screen may name an
 `actor`.
 
+`screen_image` and `table` are presentation blocks. A `screen_image` attaches a
+rough wireframe or mockup to a workflow through its `url`; a `table` records
+illustrative tabular or example data beside a workflow. Neither has flow edges
+or changes the typed model's behavior.
+
 ## Scenarios
 
 Scenarios stay beside the workflow they specify. Each step has exactly one
@@ -169,7 +174,7 @@ resolution, `EM2xx` flow, `EM3xx` scenarios, and `EM4xx` modeling judgment.
 The CLI prints `file:line:column: Severity EMxxx: Summary: Detail`.
 
 `valid` is the default and keeps judgment diagnostics as warnings. `workshop`
-makes all judgment diagnostics informational. `strict` escalates an unreasonsed
+makes all judgment diagnostics informational. `strict` escalates an unreasoned
 command (`EM404`) and an open hotspot (`EM406`) to errors. Bed, left-chair,
 right-chair, and shelf smells remain non-blocking judgment signals in every
 profile.
@@ -177,8 +182,8 @@ profile.
 ## Typed IR and Formatting
 
 Validation remains the diagnostic boundary because HCL carries precise source
-ranges. `internal/model.Load` first validates and only decodes a clean model.
-It exposes a normalized typed IR with effective titles, semantic and
+ranges. A conforming loader first validates and only decodes a clean model into
+a normalized typed IR with effective titles, semantic and
 presentation fields, ordered workflows/scenarios, and one `Edges` list whose
 entries always run source to target. Downstream tools consume this model rather
 than raw HCL.

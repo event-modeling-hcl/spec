@@ -1,6 +1,6 @@
 # Event Modeling HCL Specification
 
-The authoritative specification for Event Modeling HCL v0.2.0-rc.1, a native HCL
+The authoritative specification for Event Modeling HCL v0.2.0, a native HCL
 language for expressing Event Modeling workflows as validated source files.
 
 This repository defines the language. The [Go implementation](https://github.com/event-modeling-hcl/eventmodeling-hcl)
@@ -14,7 +14,7 @@ and consume it.
 - [Learning guide](guides/learning-event-modeling-hcl.md): practice-first
   material for learning Event Modeling while authoring `.em.hcl`.
 - [Migration guide](guides/migrating-v0.2.md): move an older model to the
-  v0.2.0-rc.1 language surface.
+  v0.2.0 language surface.
 - [Decision records](adrs/README.md): historical language-design decisions.
 - [Examples](examples/README.md): complete, independently valid models for the
   four patterns and a combined appointment/weather model.

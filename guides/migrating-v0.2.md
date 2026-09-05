@@ -1,4 +1,4 @@
-# Migrating to the v0.2.0 Draft
+# Migrating to v0.2.0
 
 v0.2.0 is a breaking, HCL-native revision. Migrate a model as one complete
 document; the validator does not accept old and new syntax together.

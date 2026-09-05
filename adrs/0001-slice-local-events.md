@@ -2,7 +2,7 @@
 
 ## Status
 
-Superseded by [ADR 0003](0003-bounded-context-contracts.md).
+Superseded by [ADR 0002](0002-hcl-native-surface.md).
 
 ## Context
 
