@@ -1,4 +1,4 @@
-# Event Modeling HCL Specification v0.2.0
+# Event Modeling HCL Specification v0.3.0
 
 ## Status and Scope
 
@@ -10,6 +10,10 @@ domain reference.
 v0.2.0 is a breaking revision from v0.1.0 that makes flow and State View
 scenarios canonical, makes human-facing titles optional, adds stable diagnostics
 and validation profiles, and defines a typed semantic model for downstream tools.
+
+v0.3.0 is additive: a `field` `type` is optional and infers the same-named
+`field_type`, and a `fields` list declares several typed fields at once. Every
+v0.2.0 document remains valid.
 
 ```text
 eventmodeling-hcl validate [--profile workshop|valid|strict] <model.em.hcl>
@@ -229,6 +233,8 @@ replace generic slices and string relationships with native workflow blocks and
 typed traversals; replace legacy specifications with workflow-local scenarios;
 write canonical flow forms; and remove redundant titles. Format and validate
 the result with the implementation CLI.
+
+v0.3.0 adds only optional syntax; no v0.2.0 document needs changes.
 
 This language validates one document at a time. It does not define multi-file
 loading, cross-file references, JSON conversion, context maps, or inferred

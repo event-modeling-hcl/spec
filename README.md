@@ -1,6 +1,6 @@
 # Event Modeling HCL Specification
 
-The authoritative specification for Event Modeling HCL v0.2.0, a native HCL
+The authoritative specification for Event Modeling HCL v0.3.0, a native HCL
 language for expressing Event Modeling workflows as validated source files.
 
 This repository defines the language. The [Go implementation](https://github.com/event-modeling-hcl/eventmodeling-hcl)

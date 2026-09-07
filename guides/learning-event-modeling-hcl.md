@@ -3,7 +3,7 @@
 
 > **Target:** after working through this guide, you should be able to run an Event Modeling conversation, identify the four slice patterns, encode the result as a valid `.em.hcl` document, and turn each important slice into precise pattern-specific scenarios (Given/When/Then for State Change; Given/Then for State View).
 >
-> **Normative language version:** Event Modeling HCL Specification **v0.2.0**.
+> **Normative language version:** Event Modeling HCL Specification **v0.3.0**.
 
 ---
 
@@ -198,7 +198,7 @@ automation "add_weather_forecast" {
 }
 ```
 
-This distinction prevents a common conceptual mistake: `automation` is not a nested element inside another workflow in v0.2.0; it is one of the four top-level workflow kinds.
+This distinction prevents a common conceptual mistake: `automation` is not a nested element inside another workflow in v0.3.0; it is one of the four top-level workflow kinds.
 
 ---
 
@@ -524,7 +524,7 @@ Inside a bounded context:
 - `automation`
 - `translation`
 
-A current v0.2.0 model is **one `.em.hcl` document**.
+A current v0.3.0 model is **one `.em.hcl` document**.
 
 ### Source syntax vs typed model
 
@@ -676,7 +676,7 @@ aggregate "pet" {
 }
 ```
 
-`title` and `description` are optional for aggregates in v0.2.0.
+`title` and `description` are optional for aggregates in v0.3.0.
 
 Commands and Events may reference aggregates, and they may declare aggregate dependencies when behavior spans another consistency boundary:
 
@@ -700,13 +700,34 @@ field_type "owner_id" {
 }
 ```
 
-Then reuse it:
+Then reuse it. When the field name matches the `field_type` name, drop the
+`type` and let it infer:
 
 ```hcl
-field "owner_id" {
+field "owner_id" {}
+```
+
+The inferred `field_type` is the same-named one in the field's own bounded
+context (for a field inside an `event` or a `subfield`) or, for a field on a
+workflow element such as a `screen` or `command`, the unique `field_type` of
+that name anywhere in the document. Write the `type` explicitly when the names
+differ or the bare name is ambiguous:
+
+```hcl
+field "created_by" {
   type = field_type.owner_management.owner_id
 }
 ```
+
+To attach several typed fields at once, list their field types:
+
+```hcl
+fields = [field_type.owner_management.owner_id, field_type.owner_management.owner_name]
+```
+
+Each entry becomes one field named after the last segment of the reference. Use
+a `field` block instead when a field needs `id_attribute`, `example`,
+`optional`, or `pii`. List entries come first, then any `field` blocks.
 
 For one-off technical or transport data, a built-in type can be inline:
 
@@ -716,7 +737,10 @@ field "request_id" {
 }
 ```
 
-Supported built-in types in v0.2.0:
+A `field_type` declaration always states an explicit built-in type; only plain
+`field` blocks infer.
+
+Supported built-in types in v0.3.0:
 
 `String`, `Boolean`, `Double`, `Decimal`, `Long`, `Custom`, `Date`, `DateTime`, `UUID`, `Int`.
 
@@ -1572,7 +1596,7 @@ Potentially valid HCL, but a **bed** smell.
 A `translation` consumes only `event.orders.order_placed`, where `orders` is internal.
 
 <details><summary>Answer</summary>
-Invalid under the v0.2.0 Translation externality rule. A Translation must consume at least one Event from an external bounded context.
+Invalid under the v0.3.0 Translation externality rule. A Translation must consume at least one Event from an external bounded context.
 </details>
 
 ### G
@@ -1742,7 +1766,7 @@ Answer aloud:
 
 ---
 
-# Part XVI — Current v0.2.0 boundaries
+# Part XVI — Current v0.3.0 boundaries
 
 The current specification explicitly does **not** provide:
 
@@ -1753,7 +1777,7 @@ The current specification explicitly does **not** provide:
 - JSON conversion / round-tripping;
 - inferred causal relationships that were not authored.
 
-That matters when designing repository tooling: a folder full of `.em.hcl` files can be managed by tooling around the language, but **v0.2.0 itself validates one model document at a time**.
+That matters when designing repository tooling: a folder full of `.em.hcl` files can be managed by tooling around the language, but **v0.3.0 itself validates one model document at a time**.
 
 ---
 

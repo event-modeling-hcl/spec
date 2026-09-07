@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed.
+Accepted for v0.3.0.
 
 ## 1. Summary and Motivation
 

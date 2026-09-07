@@ -1,7 +1,7 @@
 # Examples
 
 Every `.em.hcl` file here is a complete document that validates independently
-with the v0.2.0 CLI. Read the smallest pattern examples first, then use the
+with the v0.3.0 CLI. Read the smallest pattern examples first, then use the
 appointment/weather model to see patterns composed in one domain.
 
 | File | Pattern | Demonstrates |

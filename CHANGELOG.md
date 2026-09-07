@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [v0.3.0] - 2026-09-07
+
+v0.3.0 is an additive revision. A `field` block may omit `type` and infer the
+same-named `field_type`, and a `fields` list declares several typed fields at
+once. Every v0.2.0 document stays valid.
+
 ### Added
 
 - Field shorthand (RFC 0001): a `field` block may omit `type` and infer the
