@@ -13,19 +13,29 @@ bounded_context "appointments" {
     id_attribute = true
   }
 
+  field_type "requested_time" {
+    type = "DateTime"
+  }
+
   event "appointment_added" {
     aggregate = aggregate.appointment
 
     field "appointment_id" {
-      type = field_type.appointment_id
+    }
+
+    field "requested_time" {
     }
   }
 }
 
 state_change "schedule_appointment" {
   screen "schedule_appointment" {
-    actor = actor.scheduler
-    to    = [command.add_appointment]
+    actor  = actor.scheduler
+    fields = [field_type.appointments.requested_time]
+    to     = [command.add_appointment]
+
+    field "appointment_id" {
+    }
   }
 
   command "add_appointment" {
@@ -33,7 +43,9 @@ state_change "schedule_appointment" {
     to        = [event.appointments.appointment_added]
 
     field "appointment_id" {
-      type = field_type.appointments.appointment_id
+    }
+
+    field "requested_time" {
     }
   }
 

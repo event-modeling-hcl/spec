@@ -2,6 +2,26 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- Field shorthand (RFC 0001): a `field` block may omit `type` and infer the
+  same-named `field_type`, resolved in the owning `bounded_context` for event
+  and subfield fields and by unique document-wide name for workflow-element
+  fields.
+- `fields = [field_type.<...>]` list shorthand on events, workflow elements,
+  tables, and scenario steps.
+- Normative statement that `screen`, `command`, `readmodel`, `processor`,
+  `table`, and scenario steps carry `field` blocks and the `fields` list.
+
+### Changed
+
+- `field.type` is optional on a plain `field` block; a `field_type` declaration
+  still requires an explicit built-in `type`.
+- The formatter orders the `fields` list with the semantic group, before `from`
+  and `to`.
+
 ## [v0.2.0] - 2026-09-05
 
 v0.2.0 is a breaking redesign for native HCL authoring. Models written for v0.1.0

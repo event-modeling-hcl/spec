@@ -37,6 +37,7 @@ bounded_context = 'bounded_context' id '{' aggregate | field_type | event | attr
 workflow_child  = command | readmodel | screen | processor | screen_image | table | scenario
 scenario        = 'scenario' id '{' given | when | then | comment | attribute '}'
 field           = 'field' name '{' attribute | subfield '}'
+field_list      = 'fields' '=' '[' field_type_ref { ',' field_type_ref } ']'
 subfield        = 'subfield' name '{' attribute | subfield '}'
 ```
 
@@ -73,9 +74,10 @@ are invalid.
 tables, scenarios, actors, owners, chapters, and screen images. When omitted,
 the typed model derives it by title-casing the label: `pet_registered` becomes
 `Pet Registered`. An explicit title wins. The formatter never writes a derived
-title back into source. `readmodel.question`, `actor.auth_required`, field
-`type`, hotspot `question`, and chapter `workflows` retain their required
-status.
+title back into source. `readmodel.question`, `actor.auth_required`, hotspot
+`question`, and chapter `workflows` retain their required status. A `field_type`
+declaration retains its required built-in `type`; a plain `field` block may omit
+`type` and infer it (see Domain Catalog and Fields).
 
 ## Domain Catalog and Fields
 
@@ -85,7 +87,7 @@ system. `owner` references a bounded context, team, or system.
 
 An event is a past-tense fact. It may declare `aggregate`,
 `aggregate_dependencies`, fields, and presentation metadata. A field uses the
-one canonical block syntax:
+canonical block syntax:
 
 ```hcl
 field "pet_id" {
@@ -94,10 +96,29 @@ field "pet_id" {
 }
 ```
 
-`fields = { ... }` is not supported. Built-in types are `String`, `Boolean`,
-`Double`, `Decimal`, `Long`, `Custom`, `Date`, `DateTime`, `UUID`, and `Int`.
-`cardinality` is `Single` or `List`; field examples are native literals checked
-against their effective type.
+`type` is optional on a plain `field` block. When omitted, the effective type is
+the `field_type` resolved from the block's own name: a field owned by a
+`bounded_context` (inside an `event` or nested as a `subfield`) resolves against
+that context, and a field owned by a workflow element, table, or scenario step
+resolves the unique document-wide `field_type` of that name. Absence, or a name
+declared by more than one context, is an error; write an explicit `type` when
+the field name differs from the field-type name or the name is ambiguous. A
+`field_type` declaration still requires an explicit built-in `type`.
+
+A `fields` list is a shorthand for several typed fields at once:
+
+```hcl
+fields = [field_type.clinic.pet_id, field_type.clinic.pet_name]
+```
+
+Each entry adds one field named for the traversal's last segment. The list takes
+no per-field overrides; use a `field` block for those. When both appear, list
+entries come first, then `field` blocks in source order, and a name may not
+repeat across the two. The object form `fields = { ... }` is not supported.
+
+Built-in types are `String`, `Boolean`, `Double`, `Decimal`, `Long`, `Custom`,
+`Date`, `DateTime`, `UUID`, and `Int`. `cardinality` is `Single` or `List`;
+field examples are native literals checked against their effective type.
 
 ## Workflow Patterns and Canonical Flow
 
@@ -117,6 +138,12 @@ Commands, read models, screens, and processors may use semantic attributes
 such as `aggregate`, `api_endpoint`, `external_trigger`, `triggers`, and
 `service`. A read model additionally requires `question`; a screen may name an
 `actor`.
+
+Every workflow element — `screen`, `command`, `readmodel`, `processor` — plus
+`table` blocks and scenario steps carry `field` blocks and the `fields` list
+with the same syntax and semantics as an `event`. A screen has no enclosing
+context, so its shorthand fields resolve their `field_type` by unique
+document-wide name.
 
 `screen_image` and `table` are presentation blocks. A `screen_image` attaches a
 rough wireframe or mockup to a workflow through its `url`; a `table` records
@@ -190,8 +217,8 @@ than raw HCL.
 
 `fmt` canonicalizes whitespace and attribute order while preserving block and
 scenario order and traversal expressions. Its attribute order is metadata,
-ownership/status, semantic configuration, relationships (`from`, `to`), then
-nested blocks. Formatting is idempotent.
+ownership/status, semantic configuration, the `fields` list, relationships
+(`from`, `to`), then nested blocks. Formatting is idempotent.
 
 ## Compatibility
 
