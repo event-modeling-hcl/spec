@@ -4,6 +4,34 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+v0.4.0 is an additive revision. A model can be a folder of `.em.hcl` files.
+Every v0.3.0 document stays valid and keeps its meaning.
+
+### Added
+
+- Folder models (RFC 0002): a model path can be a folder. Every `.em.hcl` file
+  directly in the folder is part of the model. Files are sorted by name, and
+  references and IDs are global across files.
+- `EM013` for chapters declared in several files of a multi-file model.
+- `EM014` for a workflow listed by several chapters in a multi-file model.
+- `EM407` for a workflow outside every chapter in a multi-file model. It is
+  info in `workshop`, a warning in `valid`, and an error in `strict`.
+- New `Multi-file Models` section with the rules for folder members, merging,
+  identity, chapters, and ordering.
+
+### Changed
+
+- Model order is file name order, then source order inside each file.
+- `EM002` names the first declaration as `file:line:column`.
+- The contiguous source-order chapter rule (`EM006`) applies to one-file models
+  only. In a multi-file model, chapters set the workflow order.
+- Diagnostics name the file of the source they point at.
+- The typed IR orders `Workflows` by chapters, then by model order for
+  unchaptered workflows, in a multi-file model.
+- The specification no longer says that a model is one document. It still does
+  not define cross-folder references, modules, JSON conversion, context maps,
+  or inferred causality.
+
 ## [v0.3.0] - 2026-09-07
 
 v0.3.0 is an additive revision. A `field` block may omit `type` and infer the

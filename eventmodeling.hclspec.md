@@ -1,9 +1,9 @@
-# Event Modeling HCL Specification v0.3.0
+# Event Modeling HCL Specification v0.4.0
 
 ## Status and Scope
 
-This is the normative specification for native Event Modeling HCL. One model is
-one `.em.hcl` document. The upstream [Event Modeling
+This is the normative specification for native Event Modeling HCL. A model is
+one `.em.hcl` file or a folder of `.em.hcl` files. The upstream [Event Modeling
 Specification](https://github.com/dilgerma/event-modeling-spec) remains the
 domain reference.
 
@@ -15,15 +15,20 @@ v0.3.0 is additive: a `field` `type` is optional and infers the same-named
 `field_type`, and a `fields` list declares several typed fields at once. Every
 v0.2.0 document remains valid.
 
+v0.4.0 is additive: a model can be a folder of `.em.hcl` files (RFC 0002). Every
+v0.3.0 document remains valid and keeps its meaning.
+
 ```text
-eventmodeling-hcl validate [--profile workshop|valid|strict] <model.em.hcl>
+eventmodeling-hcl validate [--profile workshop|valid|strict] <model.em.hcl | folder>
 eventmodeling-hcl fmt [-w] <model.em.hcl>
 ```
 
 ## Language Principles
 
 - A block kind is the concept; labels are lower-snake-case identity.
-- Source order is model order. Blocks and scenario steps are never reordered.
+- Model order is file name order, then source order inside each file. Blocks and
+  scenario steps are never reordered, except that chapters set the workflow
+  order of a folder model.
 - Bounded contexts own events, aggregates, and field types.
 - Relationships are unquoted HCL traversals. Each flow edge has one canonical
   spelling.
@@ -47,6 +52,40 @@ subfield        = 'subfield' name '{' attribute | subfield '}'
 
 All labels are quoted HCL labels. HCL comments are non-semantic; use a
 `comment { description = ... }` block for a scenario note.
+
+## Multi-file Models
+
+A model path is either a file or a folder. A file is a one-file model, as in
+v0.3.0. A folder is a folder model.
+
+- A folder model uses every regular file directly in the folder whose name ends
+  in `.em.hcl` and does not start with `.`. A symlink to a file counts.
+  Subfolders and other files are ignored.
+- Member files are sorted by file name, byte by byte, without the locale. Model
+  order is file order, then source order inside each file.
+- A folder with no member file is error `EM001`.
+- A folder with exactly one member file behaves exactly like that file. The
+  chapter and ordering rules below apply only to models with two or more files.
+- The model is the union of the top-level blocks of all files. References
+  resolve across files, and every check runs on the whole model. Each file must
+  parse on its own, and a syntax error names the file it is in.
+- The same top-level ID in two files is error `EM002`. The ID spaces are those
+  of a single document. The detail names the first declaration as
+  `file:line:column`. A block never spans files, so a `bounded_context` with its
+  events, aggregates, and field types is declared in one file.
+- All `chapter` blocks of a multi-file model must be in one file. Chapters in
+  several files are error `EM013`. A workflow listed by two chapters is error
+  `EM014`.
+- The workflow order of a multi-file model is the order of the chapters in
+  their file, then the order of each chapter's `workflows` list. The contiguous
+  source-order chapter rule (`EM006`) does not apply.
+- A workflow in no chapter is judgment diagnostic `EM407`. Such workflows
+  follow all chaptered workflows, in model order. This includes a multi-file
+  model with no chapters.
+- `fmt` formats one file and never moves blocks between files.
+
+The language has no `include` or `import` block, no subfolder membership, no
+module or name space, and no way to split one block across files.
 
 ## References and Identity
 
@@ -190,10 +229,12 @@ contract, field, or triggering meaning that cannot reliably be inferred.
 ## Workshop Notation
 
 `actor`, `team`, and `system` provide reusable ownership and persona records.
-`chapter` names a non-empty, contiguous source-order list of workflows. This
-keeps chapters as lightweight facilitation structure rather than introducing a
-separate hierarchy. `hotspot` records an open or resolved question and may
-attach to a catalog item, workflow, owner, actor, or qualified element.
+`chapter` names a non-empty list of workflows. In a one-file model the list is
+contiguous in source order. This keeps chapters as lightweight facilitation
+structure rather than introducing a separate hierarchy. In a folder model the
+chapters live in one file and set the workflow order (see Multi-file Models).
+`hotspot` records an open or resolved question and may attach to a catalog item,
+workflow, owner, actor, or qualified element.
 
 Workflow status is `created`, `planned`, `assigned`, `in_progress`, `review`,
 `blocked`, `done`, or `informational`; hotspot status is `open` or `resolved`.
@@ -202,13 +243,19 @@ Workflow status is `created`, `planned`, `assigned`, `in_progress`, `review`,
 
 Diagnostics have stable `EMxxx` codes: `EM0xx` structural, `EM1xx` reference
 resolution, `EM2xx` flow, `EM3xx` scenarios, and `EM4xx` modeling judgment.
-The CLI prints `file:line:column: Severity EMxxx: Summary: Detail`.
+The CLI prints `file:line:column: Severity EMxxx: Summary: Detail`. A
+diagnostic that points at source names the file of that source. In a folder
+model the file name is the folder path joined with the file name.
+
+Two structural errors belong to folder models: `EM013` (chapters in several
+files) and `EM014` (workflow in several chapters). `EM407` (workflow outside
+every chapter) is a judgment diagnostic for folder models.
 
 `valid` is the default and keeps judgment diagnostics as warnings. `workshop`
 makes all judgment diagnostics informational. `strict` escalates an unreasoned
-command (`EM404`) and an open hotspot (`EM406`) to errors. Bed, left-chair,
-right-chair, and shelf smells remain non-blocking judgment signals in every
-profile.
+command (`EM404`), an open hotspot (`EM406`), and a workflow outside every
+chapter (`EM407`) to errors. Bed, left-chair, right-chair, and shelf smells
+remain non-blocking judgment signals in every profile.
 
 ## Typed IR and Formatting
 
@@ -219,10 +266,15 @@ presentation fields, ordered workflows/scenarios, and one `Edges` list whose
 entries always run source to target. Downstream tools consume this model rather
 than raw HCL.
 
-`fmt` canonicalizes whitespace and attribute order while preserving block and
-scenario order and traversal expressions. Its attribute order is metadata,
-ownership/status, semantic configuration, the `fields` list, relationships
-(`from`, `to`), then nested blocks. Formatting is idempotent.
+The IR `Workflows` list is in source order for a one-file model. For a
+multi-file model it is the chapter order followed by the unchaptered workflows
+in model order. Catalog items, chapters, and hotspots follow model order.
+Downstream output follows `Workflows`.
+
+`fmt` formats one file. It canonicalizes whitespace and attribute order while
+preserving block and scenario order and traversal expressions. Its attribute
+order is metadata, ownership/status, semantic configuration, the `fields` list,
+relationships (`from`, `to`), then nested blocks. Formatting is idempotent.
 
 ## Compatibility
 
@@ -236,6 +288,7 @@ the result with the implementation CLI.
 
 v0.3.0 adds only optional syntax; no v0.2.0 document needs changes.
 
-This language validates one document at a time. It does not define multi-file
-loading, cross-file references, JSON conversion, context maps, or inferred
-causality.
+v0.4.0 adds only folder models; no v0.3.0 document needs changes.
+
+This language does not define cross-folder references, modules, JSON
+conversion, context maps, or inferred causality.
