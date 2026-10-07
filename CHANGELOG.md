@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [v0.4.0] - 2026-10-07
+
 v0.4.0 is an additive revision. A model can be a folder of `.em.hcl` files.
 Every v0.3.0 document stays valid and keeps its meaning.
 

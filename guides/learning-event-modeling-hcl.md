@@ -3,7 +3,7 @@
 
 > **Target:** after working through this guide, you should be able to run an Event Modeling conversation, identify the four slice patterns, encode the result as a valid `.em.hcl` document, and turn each important slice into precise pattern-specific scenarios (Given/When/Then for State Change; Given/Then for State View).
 >
-> **Normative language version:** Event Modeling HCL Specification **v0.3.0**.
+> **Normative language version:** Event Modeling HCL Specification **v0.4.0**.
 
 ---
 
@@ -198,7 +198,7 @@ automation "add_weather_forecast" {
 }
 ```
 
-This distinction prevents a common conceptual mistake: `automation` is not a nested element inside another workflow in v0.3.0; it is one of the four top-level workflow kinds.
+This distinction prevents a common conceptual mistake: `automation` is not a nested element inside another workflow in v0.4.0; it is one of the four top-level workflow kinds.
 
 ---
 
@@ -524,7 +524,7 @@ Inside a bounded context:
 - `automation`
 - `translation`
 
-A current v0.3.0 model is **one `.em.hcl` document**.
+A current v0.4.0 model is **one `.em.hcl` file or one folder of `.em.hcl` files**. A folder model is one model that you write in several files. Section 11 tells how the files join.
 
 ### Source syntax vs typed model
 
@@ -576,6 +576,22 @@ spec_row = 12
 ```
 
 The file itself carries the order. Keep workflows in business-time order so the file reads like the Event Model from left to right. The formatter preserves block and scenario-step order.
+
+### Folder models
+
+A folder model is a folder of `.em.hcl` files that form one model. Every `.em.hcl` file directly in the folder joins the model. Subfolders, other files, and files with a name that starts with a dot do not join. The files sort by name, byte by byte. Model order is file order first, then source order in each file. A number prefix such as `00-catalog.em.hcl` keeps the files in reading order.
+
+A block never spans files. Each bounded context, with its events, aggregates, and field types, stays in one file. A reference can point to a block in any file of the folder. Each ID space works as in one file, so the same workflow ID in two files is `EM002`.
+
+```text
+clinic/
+  00-catalog.em.hcl
+  01-chapters.em.hcl
+  10-register-pet.em.hcl
+  11-pet-directory.em.hcl
+```
+
+A folder with only one `.em.hcl` file works exactly like that file. Section 25 tells how chapters set the board order of a folder model with two or more files.
 
 ## 12. Typed references: the most important HCL syntax habit
 
@@ -676,7 +692,7 @@ aggregate "pet" {
 }
 ```
 
-`title` and `description` are optional for aggregates in v0.3.0.
+`title` and `description` are optional for aggregates in v0.4.0.
 
 Commands and Events may reference aggregates, and they may declare aggregate dependencies when behavior spans another consistency boundary:
 
@@ -740,7 +756,7 @@ field "request_id" {
 A `field_type` declaration always states an explicit built-in type; only plain
 `field` blocks infer.
 
-Supported built-in types in v0.3.0:
+Supported built-in types in v0.4.0:
 
 `String`, `Boolean`, `Double`, `Decimal`, `Long`, `Custom`, `Date`, `DateTime`, `UUID`, `Int`.
 
@@ -1015,7 +1031,9 @@ chapter "pet_registration" {
 }
 ```
 
-The validator rejects a non-contiguous chapter.
+In a one-file model, the validator rejects a non-contiguous chapter.
+
+In a folder model with two or more files, chapters set the workflow order. All `chapter` blocks must be in one file, or the validator reports `EM013`. A workflow in two chapters is `EM014`. The board shows the workflows in chapter order, and in list order in each chapter. The contiguous rule does not apply. A workflow that is in no chapter gets warning `EM407` and goes after the chaptered workflows, in model order. The `strict` profile makes `EM407` an error.
 
 ---
 
@@ -1596,7 +1614,7 @@ Potentially valid HCL, but a **bed** smell.
 A `translation` consumes only `event.orders.order_placed`, where `orders` is internal.
 
 <details><summary>Answer</summary>
-Invalid under the v0.3.0 Translation externality rule. A Translation must consume at least one Event from an external bounded context.
+Invalid under the v0.4.0 Translation externality rule. A Translation must consume at least one Event from an external bounded context.
 </details>
 
 ### G
@@ -1766,18 +1784,20 @@ Answer aloud:
 
 ---
 
-# Part XVI — Current v0.3.0 boundaries
+# Part XVI — Current v0.4.0 boundaries
 
 The current specification explicitly does **not** provide:
 
-- multi-file model loading;
-- cross-file reference resolution;
+- `include` or `import` blocks;
+- subfolders as part of a model;
+- modules or name spaces;
+- one block split over several files;
 - context-map syntax;
 - HCL formatting;
 - JSON conversion / round-tripping;
 - inferred causal relationships that were not authored.
 
-That matters when designing repository tooling: a folder full of `.em.hcl` files can be managed by tooling around the language, but **v0.3.0 itself validates one model document at a time**.
+That matters when designing repository tooling. A folder is one model, and its IDs are global. If you need two models, use two folders. A reference cannot point from one folder model into another.
 
 ---
 
@@ -2036,9 +2056,9 @@ HCL RULES TO REMEMBER
 - Matching titles are derived from labels; explicit titles are overrides.
 - Translation consumes an external Event; Automation must not.
 - Unknowns become hotspots.
-- Source order is model order.
+- Model order is file name order, then source order. In a folder model, chapters set the workflow order.
 - Format: eventmodeling-hcl fmt -w <model.em.hcl>
-- Validate: eventmodeling-hcl validate [--profile workshop|valid|strict] <model.em.hcl>
+- Validate: eventmodeling-hcl validate [--profile workshop|valid|strict] <model.em.hcl | folder>
 
 MOST USEFUL QUESTION
 What happens next?
