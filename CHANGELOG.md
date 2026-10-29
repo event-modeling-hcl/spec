@@ -4,6 +4,17 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Clarified existing hotspot status semantics: omission means `open`, and only
+  open hotspots receive `EM406`. Resolution preserves the question and attachment.
+
+### Proposals
+
+- [RFC 0003](rfcs/0003-hotspot-resolution.md) proposes an optional hotspot
+  `resolution` string, independent of status, to preserve answers and reopened
+  decisions. It is not part of the released language.
+
 ## [v0.4.0] - 2026-10-07
 
 v0.4.0 is an additive revision. A model can be a folder of `.em.hcl` files.

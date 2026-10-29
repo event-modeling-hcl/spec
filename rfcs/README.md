@@ -23,3 +23,8 @@ changes. Rejected and superseded RFCs remain in the repository as history.
 
 The specification repository is the language authority. An implementation must
 not introduce undocumented language behavior.
+
+## Proposals
+
+- [RFC 0003: Hotspot Resolution](0003-hotspot-resolution.md) — proposed optional
+  answer text, independent of the existing open/resolved status.

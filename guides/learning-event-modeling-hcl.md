@@ -1014,6 +1014,14 @@ A hotspot is durable model information: an unresolved question, blocker, or disp
 
 The visual workshop uses red notes; HCL uses a `hotspot` block.
 
+`status` can be `"open"` or `"resolved"`. If you omit it, the hotspot is open.
+Marking it resolved stops `EM406`; it does not delete the question or its attachment.
+Keep the question when it explains a decision that future readers need.
+
+[RFC 0003](../rfcs/0003-hotspot-resolution.md) proposes an optional `resolution`
+field for its answer. This is a proposal, not v0.4.0 syntax. The current CLI
+does not accept the field.
+
 ---
 
 ## 25. Chapters

@@ -239,6 +239,15 @@ workflow, owner, actor, or qualified element.
 Workflow status is `created`, `planned`, `assigned`, `in_progress`, `review`,
 `blocked`, `done`, or `informational`; hotspot status is `open` or `resolved`.
 
+Hotspot `status` is optional. Its effective value is `open` when omitted.
+An open hotspot receives `EM406` under the selected profile; a resolved hotspot
+does not. Changing status does not change the hotspot's question or attachment.
+Keep resolved hotspots when they preserve useful workshop information.
+
+RFC 0003 proposes a separate `resolution` string to record the answer.
+That attribute is not part of v0.4.0; see
+[Hotspot Resolution](rfcs/0003-hotspot-resolution.md) for the proposal.
+
 ## Diagnostics and Profiles
 
 Diagnostics have stable `EMxxx` codes: `EM0xx` structural, `EM1xx` reference
