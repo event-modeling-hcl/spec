@@ -3,6 +3,11 @@
 v0.2.0 is a breaking, HCL-native revision. Migrate a model as one complete
 document; the validator does not accept old and new syntax together.
 
+> This guide is historical: it describes the move from v0.1 to v0.2.0. v0.5.0
+> later removed the `translation` keyword, derived titles, type inference, and
+> ordered chapters, and added the required `board` block. After you reach
+> v0.4.0, follow [Migrating to v0.5.0](migrating-v0.4.md).
+
 ## 1. Normalize Identities
 
 Change every labeled identity to lower snake case. Remove duplicated `id`,
@@ -34,6 +39,10 @@ traversal.
 Replace `slice` plus `slice_type` with `state_change`, `state_view`, or
 `automation`. Use `translation` for an automation that consumes an event from
 an external bounded context.
+
+> v0.5.0 removed the `translation` keyword. A translation is now an
+> `automation` that consumes an external event. See
+> [Migrating to v0.5.0](migrating-v0.4.md).
 
 ## 4. Replace Relationship Syntax
 

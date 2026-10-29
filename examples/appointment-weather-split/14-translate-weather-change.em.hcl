@@ -1,4 +1,4 @@
-translation "translate_weather_change" {
+automation "translate_weather_change" {
   title = "Translate Changed Weather"
 
   readmodel "changed_predictions" {

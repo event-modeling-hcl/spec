@@ -4,16 +4,59 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
-### Changed
-
-- Clarified existing hotspot status semantics: omission means `open`, and only
-  open hotspots receive `EM406`. Resolution preserves the question and attachment.
-
 ### Proposals
 
 - [RFC 0003](rfcs/0003-hotspot-resolution.md) proposes an optional hotspot
   `resolution` string, independent of status, to preserve answers and reopened
   decisions. It is not part of the released language.
+
+## [v0.5.0] - 2026-10-29
+
+v0.5.0 is a breaking revision (RFC 0004, Uncoupled Authoring Controls). Each
+authoring concern has its own control. A v0.4.0 model does not load under
+v0.5.0 rules; `migrate` converts it without changing its meaning.
+
+### Added
+
+- Required top-level `board { workflows = [...] }` block. It is the only
+  source of story order. A workflow that the board omits is off-board: it is
+  valid, has no diagnostic, and appears in the IR off-board set in ID order.
+- `EM015` for a missing or repeated `board` block and `EM016` for a workflow
+  that the board lists twice. Both are errors in every profile.
+- IR edges whose source is a catalog event carry the `external` value of the
+  event's context. A translation is an automation with an external edge.
+- `migrate [-w]` converts a v0.4.0 model: it writes the board in the old
+  effective order, explicit field types, explicit titles, and `automation` for
+  `translation`.
+- A complete diagnostic registry in the specification, with definitions of the
+  bed, left-chair, right-chair, and shelf signals.
+- [Migration guide](guides/migrating-v0.4.md) for v0.4.0 models.
+
+### Changed
+
+- Every `field` and `subfield` requires `type`. A missing type is `EM009` in
+  every profile. Name inference is removed.
+- Titles are literal text. An omitted title is absent in the IR and is never
+  derived from the label.
+- Chapters are membership sets. Their list order has no meaning, they can live
+  in any member file, and a repeated entry is `EM002`. `EM014` applies to every
+  model.
+- File layout has no meaning. One-file and folder models use identical rules.
+  The IR orders catalog items, chapters, hotspots, workflow elements, and
+  scenarios by ID, and workflows by the board.
+- An `automation` may consume external events.
+- The judgment profile assigns severity only. A model without core errors
+  always yields the typed IR; a strict-profile error rejects policy and still
+  makes `validate` fail.
+- Clarified hotspot status semantics: omission means `open`, and only open
+  hotspots emit `EM406`. Resolution preserves the question and attachment.
+
+### Removed
+
+- The `translation` workflow keyword.
+- `EM006` (chapter source-order range), `EM011` and `EM012` (translation and
+  automation externality), `EM013` (chapters in several files), and `EM407`
+  (workflow outside every chapter). These codes are never reassigned.
 
 ## [v0.4.0] - 2026-10-07
 

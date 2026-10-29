@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed. Not part of Specification v0.4.0. The current implementation accepts
+Proposed. Not part of Specification v0.5.0. The current implementation accepts
 hotspot `status`, but does not accept `resolution`.
 
 ## 1. Summary and Motivation
@@ -47,7 +47,7 @@ open question from a resolved question.
 
 ## 3. Compatibility and Migration
 
-This is an additive proposal. Every v0.4.0 model remains valid and retains its
+This is an additive proposal. Every v0.5.0 model remains valid and retains its
 meaning, including a resolved hotspot without an answer. No migration is
 required for existing models.
 
@@ -95,7 +95,7 @@ specification-only proposal.
 
 ## 5. Examples and Acceptance Tests
 
-The following snippets demonstrate the proposal. They are not current v0.4.0
+The following snippets demonstrate the proposal. They are not current v0.5.0
 examples and are not supported by the current CLI.
 
 ### Record an answer

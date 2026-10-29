@@ -3,7 +3,7 @@
 
 > **Target:** after working through this guide, you should be able to run an Event Modeling conversation, identify the four slice patterns, encode the result as a valid `.em.hcl` document, and turn each important slice into precise pattern-specific scenarios (Given/When/Then for State Change; Given/Then for State View).
 >
-> **Normative language version:** Event Modeling HCL Specification **v0.4.0**.
+> **Normative language version:** Event Modeling HCL Specification **v0.5.0**.
 
 ---
 
@@ -25,7 +25,7 @@ This structure deliberately uses several learning effects supported by research:
 
 - **Retrieval practice:** actively recalling information usually produces better long-term retention than simply rereading it.
 - **Spacing:** revisiting material across separated sessions is generally better for durable retention than massing the same practice into one sitting.
-- **Interleaving:** mixing similar-but-different problem types helps you learn to discriminate between them. This is especially useful here because `state_change`, `state_view`, `automation`, and `translation` look related but encode different causal structures.
+- **Interleaving:** mixing similar-but-different problem types helps you learn to discriminate between them. This is especially useful here because State Change, State View, Automation, and Translation look related but encode different causal structures.
 - **Worked examples + fading:** first study a correct example, then complete a partially specified example, then create one independently.
 - **Self-explanation:** explain *why* a model is valid, not merely *what* it contains.
 
@@ -45,13 +45,16 @@ If you can reconstruct the model after forgetting some of it, that retrieval eff
 
 ### Current schema changes to memorize
 
-If you learned an earlier draft, retrieve these five differences before continuing:
+If you learned an earlier draft, retrieve these differences before continuing:
 
 1. **One edge, one canonical spelling.** Workflow-local sources use `to`; catalog Events are consumed through the receiver's `from`. Reverse spellings are invalid.
 2. **State View scenarios are GIVEN -> THEN.** They have one or more Event `given` steps, **no `when`**, and one or more Read Model / Error `then` steps. There is no `query` concept.
-3. **Obvious titles are derived.** `pet_registered` already has the effective title `Pet Registered`; write `title` only to override the derived wording.
-4. **Validation has profiles and stable diagnostics.** Use `workshop`, `valid` (default), or `strict`; diagnostics use stable `EMxxx` codes.
+3. **Titles are optional and never derived.** When you omit `title`, the title is absent. Tools show the label as the identity. Write `title` only when you want human wording.
+4. **Validation has profiles and stable diagnostics.** Use `workshop`, `valid` (default), or `strict`; diagnostics use stable `EMxxx` codes. A profile never stops tools from receiving a model that has no core error.
 5. **Formatting and the typed IR are first-class.** `fmt` canonicalizes source presentation, while downstream tools consume the validated typed model rather than raw HCL.
+6. **The `board` block sets the story order.** Every model has exactly one `board { workflows = [...] }`. File names, block positions, and chapters never order the model.
+7. **Every field states its type.** Each `field` and `subfield` needs `type`. Nothing is inferred from the name.
+8. **There is no `translation` keyword.** A Translation is an `automation` that consumes an Event from an external bounded context.
 
 ---
 
@@ -102,7 +105,7 @@ bounded_context "appointments" {
 }
 ```
 
-The block label is the identity (`appointment_added`). In the current schema, obvious human-facing titles are **derived automatically**: `appointment_added` becomes `Appointment Added`. Add an explicit `title` only when you want wording that differs from the label-derived default.
+The block label is the identity (`appointment_added`). A `title` is optional. When you omit it, the title is absent: tools show the label `appointment_added` as the identity. Add an explicit `title` only when you want human wording such as `Appointment Added`.
 
 **Rule of thumb:** if the thing can still be rejected, it is probably not an Event yet.
 
@@ -169,7 +172,7 @@ screen "calendar_ui" {
 }
 ```
 
-Actors are reusable catalog declarations. Their `title` can also be derived from the label:
+Actors are reusable catalog declarations. Their `title` is optional too:
 
 ```hcl
 actor "calendar_user" {
@@ -198,7 +201,7 @@ automation "add_weather_forecast" {
 }
 ```
 
-This distinction prevents a common conceptual mistake: `automation` is not a nested element inside another workflow in v0.4.0; it is one of the four top-level workflow kinds.
+This distinction prevents a common conceptual mistake: `automation` is not a nested element inside another workflow in v0.5.0; it is one of the three top-level workflow kinds (`state_change`, `state_view`, `automation`).
 
 ---
 
@@ -212,8 +215,10 @@ Interleaving works well when categories are similar enough to be confused. So do
 |---|---|---|---|---|---|
 | State Change | What does someone want to change? | Screen/API -> Command -> Event | Often | No requirement | `state_change` |
 | State View | What does someone need to know? | Event -> Read Model -> Screen/UI | Often | No requirement | `state_view` |
-| Automation | What should the system do next by itself? | Internal Event -> Read Model/Processor -> Command -> Event | No | **No external event input** | `automation` |
-| Translation | How do we translate another context/system's fact into our language? | External Event -> Read Model/Processor -> Command -> Internal Event | No | **Yes** | `translation` |
+| Automation | What should the system do next by itself? | Internal Event -> Read Model/Processor -> Command -> Event | No | No external event input | `automation` |
+| Translation | How do we translate another context/system's fact into our language? | External Event -> Read Model/Processor -> Command -> Internal Event | No | **Yes** | `automation` that consumes an external Event |
+
+Four patterns map to three workflow keywords. A Translation is written as an `automation` whose input Event belongs to a bounded context with `external = true`. The typed IR marks each edge that starts at an external Event, so tools can show the Translation. The validator does not check whether an `automation` is "really" an Automation or a Translation; that is your modeling judgment.
 
 ### Retrieval cue
 
@@ -251,6 +256,10 @@ bounded_context "appointments" {
   }
 }
 
+board {
+  workflows = [workflow.schedule_appointment]
+}
+
 state_change "schedule_appointment" {
   screen "schedule_appointment_ui" {
     actor = actor.scheduler
@@ -271,7 +280,8 @@ state_change "schedule_appointment" {
 3. `screen.schedule_appointment_ui -> command.add_appointment` is written once as `screen.to`.
 4. `command.add_appointment -> event.appointments.appointment_added` is written once as `command.to`.
 5. References are **unquoted traversals**, not strings.
-6. Matching `title` attributes are omitted because the typed model derives them from labels.
+6. Optional `title` attributes are omitted. The titles are absent, and tools show the labels.
+7. The `board` block lists the workflow. It is the only source of story order.
 
 ### API-triggered commands
 
@@ -374,7 +384,7 @@ automation "add_weather_forecast" {
 
 Notice the canonical source-to-target spelling: `readmodel.to -> processor`, then `processor.to -> command`. Reverse forms such as `processor.from = [readmodel...]` and `command.from = [processor...]` are invalid.
 
-An `automation` must **not** consume an Event from an external bounded context. If it does, the workflow is a Translation.
+When an `automation` consumes an Event from an external bounded context, the pattern is a Translation. You still write the `automation` keyword. Section 7 shows how.
 
 ## 7. Translation
 
@@ -403,10 +413,10 @@ bounded_context "weather_provider" {
 }
 ```
 
-Then translate it:
+Then translate it with an `automation`. The external input Event makes it a Translation:
 
 ```hcl
-translation "translate_weather_change" {
+automation "translate_weather_change" {
   readmodel "changed_predictions" {
     question = "Which external weather predictions changed?"
     from     = [event.weather_provider.weather_forecast_changed]
@@ -423,7 +433,9 @@ translation "translate_weather_change" {
 }
 ```
 
-A Translation must consume at least one Event from an external bounded context. The same canonical edge rule applies as in Automation.
+The language has no `translation` keyword. The `external = true` flag on the bounded context is the only place that states the boundary. The typed IR marks the edge from `event.weather_provider.weather_forecast_changed` as external, and a tool that shows Translations derives them from that mark. The same canonical edge rule applies as in any Automation.
+
+The validator does not compare the workflow with the `external` flag. If an `automation` that you call a Translation consumes only internal Events, the model is still valid. Whether that is the right model is your judgment.
 
 A Translation can also feed an external Event directly into a Processor when no Read Model is needed:
 
@@ -443,7 +455,7 @@ The cheat sheet's workshop is a progression from discovery to testable rules.
 | Workshop stage | Goal | What you discover | Where it ends up in HCL |
 |---|---|---|---|
 | 1. Brainstorming | collect events | facts that happen | `event` blocks inside `bounded_context` |
-| 2. The plot | find the story | business-time order | workflow source order; chapters when useful |
+| 2. The plot | find the story | business-time order | `board` workflow order; chapters when useful |
 | 3. Storyboarding | common understanding | actor-visible screens | `actor`, `screen`, optionally `screen_image` |
 | 4. Input / Output | information flow | Commands, Read Models, arrows | `command`, `readmodel`, `processor`, `from`, `to` |
 | 5. Swimlanes | ownership | teams/systems/contexts that own data | `bounded_context`, `team`, `system`, `owner`, `external` |
@@ -491,10 +503,11 @@ Do not let the precision of HCL pull implementation detail *back into* the disco
 
 ## 10. The document model
 
-A `.em.hcl` file contains three broad categories:
+A `.em.hcl` model contains four broad categories:
 
 ```text
 catalog declarations
+story (the board)
 workshop notation
 workflows
 ```
@@ -512,6 +525,10 @@ Inside a bounded context:
 - `field_type`
 - `event`
 
+### Story
+
+- `board` (exactly one per model; it has no label)
+
 ### Workshop notation
 
 - `chapter`
@@ -522,19 +539,20 @@ Inside a bounded context:
 - `state_change`
 - `state_view`
 - `automation`
-- `translation`
 
-A current v0.4.0 model is **one `.em.hcl` file or one folder of `.em.hcl` files**. A folder model is one model that you write in several files. Section 11 tells how the files join.
+Translation is not a separate keyword. It is an `automation` that consumes an external Event.
+
+A current v0.5.0 model is **one `.em.hcl` file or one folder of `.em.hcl` files**. A folder model is one model that you write in several files. Section 11 tells how the files join. The model has exactly one `board` block.
 
 ### Source syntax vs typed model
 
-`.em.hcl` is the human/LLM authoring syntax. After validation, downstream tooling should consume the normalized typed model / IR rather than reason directly from raw HCL. The typed model exposes effective derived titles and a canonical source-to-target `Edges` list.
+`.em.hcl` is the human/LLM authoring syntax. After validation, downstream tooling should consume the normalized typed model / IR rather than reason directly from raw HCL. The typed model exposes literal titles (absent when omitted), the board sequence, the off-board workflows, and a canonical source-to-target `Edges` list. An edge that starts at a catalog Event carries the `external` value of that Event's context.
 
 The IR also distinguishes semantic information from presentation information. For example, `aggregate`, `from`, `to`, `question`, and `actor` affect the modeled behavior/contracts, while `group_id`, `tags`, `sketched`, `prototype`, and `list_element` are presentation/workshop metadata.
 
 ---
 
-## 11. Identities, derived titles, and source order
+## 11. Identities, titles, and story order
 
 ### Block labels are identities
 
@@ -543,20 +561,15 @@ state_change "add_pet" {}
 ```
 
 - identity: `add_pet`
-- effective display title: `Add Pet`
+- title: absent (a tool shows the identity `add_pet`)
 
 Labels use `lower_snake_case`. Do not repeat identity using `id`, `name`, `type`, `slice_type`, or an index attribute.
 
-### Titles are usually derived
+### Titles are never derived
 
-For labeled declarations, matching human-facing titles are optional. The typed model title-cases the label:
+For labeled declarations, `title` is optional. When you omit it, the title is absent. The typed model does not make a title from the label, and the formatter never writes one. A tool shows the identity separately. It may show the identity when the title is absent, but it does not present the identity as title text.
 
-```text
-pet_registered       -> Pet Registered
-students_to_welcome  -> Students To Welcome
-```
-
-Use an explicit title only when you intentionally want different wording or capitalization:
+Write a title when you want human wording:
 
 ```hcl
 event "payment_failed" {
@@ -564,9 +577,9 @@ event "payment_failed" {
 }
 ```
 
-The formatter does **not** write derived titles back into source. Required semantic data stays required: for example `readmodel.question`, `actor.auth_required`, field `type`, hotspot `question`, and chapter `workflows`.
+Required semantic data stays required: for example `readmodel.question`, `actor.auth_required`, field and subfield `type`, hotspot `question`, and board and chapter `workflows`.
 
-### Source order is model order
+### The board is the story order
 
 Do not add bookkeeping such as:
 
@@ -575,23 +588,35 @@ index    = 4
 spec_row = 12
 ```
 
-The file itself carries the order. Keep workflows in business-time order so the file reads like the Event Model from left to right. The formatter preserves block and scenario-step order.
+The `board` block carries the story order:
+
+```hcl
+board {
+  workflows = [workflow.register_pet, workflow.pet_directory]
+}
+```
+
+A model has exactly one `board` block (`EM015`). Each entry names an existing workflow, and an entry may appear only once (`EM016`). The board is the only source of story order. Top-level block position, file names, and chapters never order the model.
+
+The list may omit workflows. A workflow that the board omits is **off-board**: it is part of the model and passes every rule, but it is not in the story sequence. No profile reports it. So you can add a workflow first and put it on the board later.
+
+Order still matters inside blocks: scenario steps, field declarations, and explicit reference lists keep their source order. The formatter preserves block and scenario-step order.
 
 ### Folder models
 
-A folder model is a folder of `.em.hcl` files that form one model. Every `.em.hcl` file directly in the folder joins the model. Subfolders, other files, and files with a name that starts with a dot do not join. The files sort by name, byte by byte. Model order is file order first, then source order in each file. A number prefix such as `00-catalog.em.hcl` keeps the files in reading order.
+A folder model is a folder of `.em.hcl` files that form one model. Every `.em.hcl` file directly in the folder joins the model. Subfolders, other files, and files with a name that starts with a dot do not join. File names have no meaning for the model. You can move whole blocks between files, or rename files, and the typed model and the diagnostic codes stay the same. Only source locations change.
 
-A block never spans files. Each bounded context, with its events, aggregates, and field types, stays in one file. A reference can point to a block in any file of the folder. Each ID space works as in one file, so the same workflow ID in two files is `EM002`.
+A block never spans files. Each bounded context, with its events, aggregates, and field types, stays in one file. A reference can point to a block in any file of the folder. Each ID space works as in one file, so the same workflow ID in two files is `EM002`. The one `board` block and any `chapter` blocks may be in any file.
 
 ```text
 clinic/
-  00-catalog.em.hcl
-  01-chapters.em.hcl
-  10-register-pet.em.hcl
-  11-pet-directory.em.hcl
+  board.em.hcl
+  catalog.em.hcl
+  register-pet.em.hcl
+  pet-directory.em.hcl
 ```
 
-A folder with only one `.em.hcl` file works exactly like that file. Section 25 tells how chapters set the board order of a folder model with two or more files.
+A folder with only one `.em.hcl` file works exactly like that file. Section 25 tells how chapters group workflows.
 
 ## 12. Typed references: the most important HCL syntax habit
 
@@ -601,7 +626,7 @@ The language deliberately distinguishes literal data from relationships.
 
 ```hcl
 description = "Registers a new pet."
-title       = "Register a Pet" # explicit override; usually optional
+title       = "Register a Pet" # optional human wording
 ```
 
 ### Unquoted traversals are references
@@ -692,7 +717,7 @@ aggregate "pet" {
 }
 ```
 
-`title` and `description` are optional for aggregates in v0.4.0.
+`title` and `description` are optional for aggregates in v0.5.0.
 
 Commands and Events may reference aggregates, and they may declare aggregate dependencies when behavior spans another consistency boundary:
 
@@ -716,18 +741,15 @@ field_type "owner_id" {
 }
 ```
 
-Then reuse it. When the field name matches the `field_type` name, drop the
-`type` and let it infer:
+Then reuse it. Every `field` names its type explicitly, even when the field name matches the `field_type` name:
 
 ```hcl
-field "owner_id" {}
+field "owner_id" {
+  type = field_type.owner_management.owner_id
+}
 ```
 
-The inferred `field_type` is the same-named one in the field's own bounded
-context (for a field inside an `event` or a `subfield`) or, for a field on a
-workflow element such as a `screen` or `command`, the unique `field_type` of
-that name anywhere in the document. Write the `type` explicitly when the names
-differ or the bare name is ambiguous:
+The language never infers a type from the field name. A `field` or `subfield` without `type` is error `EM009`. The same rule holds everywhere: in events, workflow elements, tables, scenario steps, and nested subfields. The field name and the type name may differ:
 
 ```hcl
 field "created_by" {
@@ -753,10 +775,9 @@ field "request_id" {
 }
 ```
 
-A `field_type` declaration always states an explicit built-in type; only plain
-`field` blocks infer.
+A `field_type` declaration always states an explicit built-in type.
 
-Supported built-in types in v0.4.0:
+Supported built-in types in v0.5.0:
 
 `String`, `Boolean`, `Double`, `Decimal`, `Long`, `Custom`, `Date`, `DateTime`, `UUID`, `Int`.
 
@@ -805,7 +826,7 @@ field_type "owner_pets" {
 }
 ```
 
-Examples are native HCL literals, and the validator checks that examples match the effective type.
+Examples are native HCL literals, and the validator checks that examples match the declared type.
 
 ---
 
@@ -852,7 +873,7 @@ The canonical patterns are:
 
 - State Change: `screen.to -> command`; `command.to -> event`
 - State View: `event -> readmodel.from`; `readmodel.to -> screen`
-- Automation/Translation: `event -> readmodel.from` or `processor.from`; `readmodel.to -> processor`; `processor.to -> command`; `command.to -> event`
+- Automation (including Translation): `event -> readmodel.from` or `processor.from`; `readmodel.to -> processor`; `processor.to -> command`; `command.to -> event`
 
 Reverse forms such as `screen.from = [readmodel...]`, `processor.from = [readmodel...]`, and `command.from = [processor...]` are invalid.
 
@@ -868,7 +889,7 @@ If the source is a workflow element, put `to` on it. If the source is a catalog 
 
 ## 18. Scenario grammar is pattern-specific
 
-A `scenario` lives beside the workflow it specifies. Its `title` is optional and is derived from the label when omitted. Source order is scenario order.
+A `scenario` lives beside the workflow it specifies. Its `title` is optional; when omitted, the title is absent. Source order is scenario order.
 
 The important change is that **not every pattern has a `when` step**:
 
@@ -876,7 +897,7 @@ The important change is that **not every pattern has a `when` step**:
 |---|---|---|---|---|
 | State Change | Event | Command | Event or Error | zero or more `given`, exactly one `when`, one or more `then` |
 | State View | Event | **none** | Read Model or Error | one or more `given`, **zero `when`**, one or more `then` |
-| Automation / Translation | Event or Read Model | Processor or Command | Event or Error | exactly one `when`, one or more `then` |
+| Automation (including Translation) | Event or Read Model | Processor or Command | Event or Error | exactly one `when`, one or more `then` |
 
 Each step has exactly one typed target. `error` is a literal string.
 
@@ -955,9 +976,9 @@ scenario "registered_student_needs_welcome" {
 
 A State View scenario must have at least one Event `given`, **no `when` blocks**, and one or more `then` steps. A `query = ...` attribute is unknown syntax and is rejected.
 
-## 21. Automation / Translation scenarios
+## 21. Automation scenarios (including Translation)
 
-For an Automation or Translation scenario:
+For an `automation` scenario, whether the pattern is an Automation or a Translation:
 
 - `given` targets an Event or Read Model;
 - there is exactly one `when`;
@@ -1019,14 +1040,14 @@ Marking it resolved stops `EM406`; it does not delete the question or its attach
 Keep the question when it explains a decision that future readers need.
 
 [RFC 0003](../rfcs/0003-hotspot-resolution.md) proposes an optional `resolution`
-field for its answer. This is a proposal, not v0.4.0 syntax. The current CLI
+field for its answer. This is a proposal, not v0.5.0 syntax. The current CLI
 does not accept the field.
 
 ---
 
 ## 25. Chapters
 
-Chapters group **contiguous** workflow ranges.
+A chapter names a group of workflows. Its `workflows` list is a **set**: the order of the entries has no meaning.
 
 ```hcl
 chapter "pet_registration" {
@@ -1039,9 +1060,15 @@ chapter "pet_registration" {
 }
 ```
 
-In a one-file model, the validator rejects a non-contiguous chapter.
+The rules:
 
-In a folder model with two or more files, chapters set the workflow order. All `chapter` blocks must be in one file, or the validator reports `EM013`. A workflow in two chapters is `EM014`. The board shows the workflows in chapter order, and in list order in each chapter. The contiguous rule does not apply. A workflow that is in no chapter gets warning `EM407` and goes after the chaptered workflows, in model order. The `strict` profile makes `EM407` an error.
+- The `workflows` list must not be empty (`EM005`).
+- Each entry names an existing workflow. A repeated entry in one chapter is `EM002`.
+- A workflow belongs to at most one chapter (`EM014`). A workflow may belong to no chapter, and that has no diagnostic.
+- Chapters may live in any file of a folder model.
+- A chapter may contain off-board workflows.
+
+Chapters never change the board, and the board never changes chapters. A grouped view may filter the board sequence by chapter, but the story order always comes from the `board` block. The workflows of one chapter do not need to be next to each other on the board.
 
 ---
 
@@ -1158,8 +1185,9 @@ The validator rejects problems such as:
 - unresolved or wrong-kind references;
 - non-canonical / invalid flow directions;
 - invalid pattern-specific scenario structure or targets;
-- non-contiguous chapters;
-- incorrect Automation/Translation externality.
+- a missing or repeated `board` block, or a repeated board entry;
+- a field or subfield without `type`;
+- a workflow in more than one chapter.
 
 Run the default `valid` profile:
 
@@ -1176,6 +1204,8 @@ eventmodeling-hcl validate --profile strict my-model.em.hcl
 ```
 
 Diagnostics use stable `EMxxx` codes: `EM0xx` structural, `EM1xx` references, `EM2xx` flow, `EM3xx` scenarios, and `EM4xx` modeling judgment. Treat diagnostics as part of the authoring loop, not a final ceremony.
+
+Core diagnostics (`EM000` to `EM303`) are errors in every profile, and any of them prevents the typed IR. The profile only sets the severity of the judgment signals. `validate` fails when a judgment signal has error severity, but a tool that renders or exports still receives the typed IR and reports the rejection separately.
 
 After validation, canonicalize the source:
 
@@ -1206,7 +1236,7 @@ A valid file can still be a poor model.
 
 > **Syntax and reference correctness are machine-checkable. Business clarity is not fully machine-checkable.**
 
-Use strictness to make an agent-ready model more explicit; do not use permissiveness to hide uncertainty. Unknown business facts belong in `hotspot` blocks.
+Use strictness to make an agent-ready model more explicit; do not use permissiveness to hide uncertainty. Unknown business facts belong in `hotspot` blocks. The `strict` profile rejects policy; it does not hide diagrams or other tool output.
 
 # Part IX — The 20 Event Modeling rules, organized for memory
 
@@ -1222,7 +1252,7 @@ Instead of memorizing a flat list, chunk them into five groups.
 
 ### HCL consequence
 
-Declare canonical past-tense Events, preserve meaningful source order, and use `hotspot` rather than inventing certainty.
+Declare canonical past-tense Events, list workflows on the `board` in business-time order, and use `hotspot` rather than inventing certainty.
 
 ---
 
@@ -1237,7 +1267,7 @@ Declare canonical past-tense Events, preserve meaningful source order, and use `
 
 ### HCL consequence
 
-The language gives you four workflow block kinds, typed flow directions, `api_endpoint`, `external_trigger`, and mandatory `readmodel.question`.
+The language gives you three workflow block kinds (`state_change`, `state_view`, `automation`; a Translation is an `automation` with an external input Event), typed flow directions, `api_endpoint`, `external_trigger`, and mandatory `readmodel.question`.
 
 ---
 
@@ -1304,7 +1334,7 @@ Ask:
 - What is last?
 - What happens next?
 
-Record uncertainty as hotspots.
+Record uncertainty as hotspots. This order becomes the `board` list.
 
 ### Step 3 — Assign ownership
 
@@ -1372,7 +1402,7 @@ Search for:
 - vague Event names;
 - vague Read Model questions;
 - Commands with no reason;
-- external facts modeled as internal automation.
+- external facts that are modeled in a bounded context without `external = true`.
 
 ---
 
@@ -1380,7 +1410,7 @@ Search for:
 
 ## 39. Worked example: Pet registration
 
-Read the whole slice once. Then close it and redraw the flow from memory. Notice how the current schema removes redundant titles while keeping semantic constraints explicit.
+Read the whole slice once. Then close it and redraw the flow from memory. Notice how the current schema omits optional titles while keeping semantic constraints explicit.
 
 ```hcl
 actor "clinic_staff" {
@@ -1407,6 +1437,10 @@ bounded_context "pet_management" {
       type = field_type.pet_name
     }
   }
+}
+
+board {
+  workflows = [workflow.add_pet]
 }
 
 state_change "add_pet" {
@@ -1458,7 +1492,8 @@ Answer without looking back:
 3. Why is `event.pet_management.pet_added` qualified but `command.add_pet` local?
 4. What makes `add_pet_validation_error` a State Change scenario?
 5. Which element gives the Command a reason to exist?
-6. Which titles are omitted, and how will their effective titles be derived?
+6. Which titles are omitted, and what does a tool show in their place?
+7. What does the `board` block decide, and what does it not decide?
 
 ---
 
@@ -1536,7 +1571,7 @@ Before writing HCL, answer:
 <details>
 <summary>Pattern answer</summary>
 
-This is a **Translation**, because the initiating Event belongs to an external bounded context/system.
+This is a **Translation**, because the initiating Event belongs to an external bounded context/system. In HCL you write it as an `automation`, and you mark the payment provider's bounded context with `external = true`.
 
 A likely causal shape is:
 
@@ -1619,10 +1654,10 @@ Potentially valid HCL, but a **bed** smell.
 
 ### F
 
-A `translation` consumes only `event.orders.order_placed`, where `orders` is internal.
+An `automation` that the author calls a Translation consumes only `event.orders.order_placed`, where `orders` is internal.
 
 <details><summary>Answer</summary>
-Invalid under the v0.4.0 Translation externality rule. A Translation must consume at least one Event from an external bounded context.
+Valid. Since v0.5.0 the language has no `translation` keyword and no rule that compares a workflow with the `external` flag. The typed IR shows no external edge, so tools present it as a plain Automation. Whether that is right is a modeling judgment: if the fact really comes from another system, move the Event to a bounded context with `external = true`; if the fact is internal, stop calling the slice a Translation.
 </details>
 
 ### G
@@ -1746,11 +1781,11 @@ Answer aloud:
 ## 51. Workflows
 
 - [ ] Every workflow is one independently useful/testable slice.
-- [ ] Workflow kind is exactly one of `state_change`, `state_view`, `automation`, `translation`.
+- [ ] Workflow kind is exactly one of `state_change`, `state_view`, `automation`.
 - [ ] Each Command has a reason.
 - [ ] Each Read Model has one concrete `question`.
-- [ ] Automation consumes internal facts.
-- [ ] Translation consumes at least one external Event.
+- [ ] An Automation consumes internal facts.
+- [ ] A Translation is an `automation` that consumes at least one Event from a bounded context with `external = true`.
 - [ ] Flows use valid element directions for the workflow kind.
 - [ ] Each edge is expressed once.
 
@@ -1763,22 +1798,22 @@ Answer aloud:
 
 ## 53. Fields
 
-- [ ] Every `field` / `subfield` has a `type`.
+- [ ] Every `field` / `subfield` has an explicit `type`.
 - [ ] `optional = true` means absence is valid, not merely inconvenient.
 - [ ] `pii = true` is set where appropriate.
-- [ ] `example` values match the effective type.
+- [ ] `example` values match the declared type.
 - [ ] `cardinality = "List"` is used only for list-valued data.
 
 ## 54. Scenarios
 
 - [ ] Every important slice has scenarios.
-- [ ] `when` cardinality matches the pattern (State Change and Automation/Translation: exactly one; State View: none).
+- [ ] `when` cardinality matches the pattern (State Change and Automation, including Translation: exactly one; State View: none).
 - [ ] At least one `then`.
 - [ ] Happy path exists.
 - [ ] Important error/business-rule path exists.
 - [ ] State Change: When -> Command.
 - [ ] State View: Given Event(s) -> Then Read Model (no `when`, no `query`).
-- [ ] Automation/Translation: machine action is modeled with Processor/Command targets.
+- [ ] Automation (including Translation): machine action is modeled with Processor/Command targets.
 - [ ] Semantic notes use `comment` blocks.
 
 ## 55. Workshop quality
@@ -1788,24 +1823,30 @@ Answer aloud:
 - [ ] No unexplained right chair.
 - [ ] No unexplained bed.
 - [ ] No shelf-like scenario imbalance.
-- [ ] Workflow order still reads like the business story.
+- [ ] The model has exactly one `board` block.
+- [ ] The `board` order still reads like the business story.
+- [ ] Each workflow that the board omits is off-board on purpose.
 
 ---
 
-# Part XVI — Current v0.4.0 boundaries
+# Part XVI — Current v0.5.0 boundaries
 
 The current specification explicitly does **not** provide:
 
 - `include` or `import` blocks;
 - subfolders as part of a model;
 - modules or name spaces;
+- cross-folder references;
 - one block split over several files;
 - context-map syntax;
-- HCL formatting;
 - JSON conversion / round-tripping;
-- inferred causal relationships that were not authored.
+- inferred causal relationships that were not authored;
+- types or titles inferred from labels;
+- story order from file names, block positions, or chapters.
 
 That matters when designing repository tooling. A folder is one model, and its IDs are global. If you need two models, use two folders. A reference cannot point from one folder model into another.
+
+To move a v0.4.0 model to v0.5.0, run `eventmodeling-hcl migrate`. See [Migrating to v0.5.0](migrating-v0.4.md).
 
 ---
 
@@ -1832,7 +1873,7 @@ Try these without looking up the answers.
 15. What is the State View scenario shape, and how many `when` blocks does it contain?
 16. When should an unknown become a hotspot?
 17. What does `external = true` change semantically?
-18. What does `source order is model order` let you avoid?
+18. What does the `board` block let you avoid, and what happens to a workflow that the board omits?
 19. What commands format a model and validate it with the strict profile?
 20. Name three things the validator cannot replace human judgment about.
 
@@ -1885,7 +1926,7 @@ Your task:
 6. Add one success scenario to every workflow.
 7. Add at least two error scenarios across the model.
 8. Add one hotspot for a deliberately unresolved business rule.
-9. Add one chapter covering a contiguous group of workflows.
+9. Add one chapter that groups related workflows, and list every workflow on the `board` in business-time order.
 10. Validate the file.
 
 ### Reflection
@@ -1900,9 +1941,9 @@ After it validates, ask:
 
 ---
 
-# Appendix A — Four workflow templates
+# Appendix A — Four pattern templates
 
-These templates intentionally omit derivable titles and use only canonical flow spellings.
+These templates omit optional titles and use only canonical flow spellings. Add each workflow to the `board` block of your model.
 
 ## State Change
 
@@ -1967,8 +2008,10 @@ automation "workflow_id" {
 
 ## Translation
 
+A Translation uses the `automation` keyword. `external_context` must be a bounded context with `external = true`.
+
 ```hcl
-translation "workflow_id" {
+automation "workflow_id" {
   readmodel "readmodel_id" {
     question = "Which external facts require translation?"
     from     = [event.external_context.external_event]
@@ -1991,9 +2034,9 @@ translation "workflow_id" {
 
 - **Event Modeling Cheat Sheet**, Nebulit / eventmodelers.ai: https://eventmodelers.ai/cheatsheet/
 - **Event Modeling Cheat Sheet PDF** supplied with this guide request.
-- **Event Modeling HCL Specification v0.2.0** supplied with the schema update. This is treated as the normative source for `.em.hcl` syntax, canonical flow, scenario rules, diagnostics, validation profiles, formatting, and typed IR behavior.
-- **Migrating to v0.2.0** supplied with the schema update informed the before/after authoring guidance.
-- The supplied `complete.em.hcl` is used as a current executable reference for canonical flow and model structure.
+- **Event Modeling HCL Specification v0.5.0** ([eventmodeling.hclspec.md](../eventmodeling.hclspec.md)) is the normative source for `.em.hcl` syntax, canonical flow, scenario rules, diagnostics, validation profiles, formatting, and typed IR behavior. This guide was first written against v0.2.0 and later updated.
+- **Migrating to v0.2.0** informed the before/after authoring guidance. [Migrating to v0.5.0](migrating-v0.4.md) covers the current breaking change.
+- The supplied `complete.em.hcl` was used as an executable reference for canonical flow and model structure.
 
 ## Learning-science sources retrieved through SciSpace
 
@@ -2054,19 +2097,21 @@ Shelf       = scenarios concentrated in one slice
 
 HCL RULES TO REMEMBER
 - Events/field types/aggregates belong to bounded contexts.
-- Workflow kinds are state_change/state_view/automation/translation.
+- Workflow kinds are state_change/state_view/automation (Translation = automation with an external input Event).
 - Relationships are unquoted typed traversals with ONE canonical edge spelling.
 - Workflow-local source -> `to`; catalog Event source -> receiver `from`.
 - Read Models require a concrete question.
 - State Change: GIVEN* -> exactly one WHEN Command -> THEN Event/Error.
 - State View: GIVEN Event+ -> NO WHEN -> THEN Read Model/Error.
 - There is no Query concept or `query` target.
-- Matching titles are derived from labels; explicit titles are overrides.
-- Translation consumes an external Event; Automation must not.
+- Titles are optional and never derived; an absent title stays absent.
+- Every field and subfield states its type.
+- A Translation consumes an external Event; it is written as `automation`.
 - Unknowns become hotspots.
-- Model order is file name order, then source order. In a folder model, chapters set the workflow order.
+- Exactly one board { workflows = [...] } sets story order. Omitted workflows are off-board. Files and chapters never order the model.
 - Format: eventmodeling-hcl fmt -w <model.em.hcl>
 - Validate: eventmodeling-hcl validate [--profile workshop|valid|strict] <model.em.hcl | folder>
+- Migrate a v0.4.0 model: eventmodeling-hcl migrate [-w] <model.em.hcl | folder>
 
 MOST USEFUL QUESTION
 What happens next?

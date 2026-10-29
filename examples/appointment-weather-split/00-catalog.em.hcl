@@ -17,6 +17,7 @@ bounded_context "appointments" {
   title = "Appointments"
 
   aggregate "appointment" {
+    title = "Appointment"
   }
 
   field_type "appointment_id" {
@@ -46,6 +47,7 @@ bounded_context "weather" {
   title = "Weather"
 
   aggregate "weather_forecast" {
+    title = "Weather Forecast"
   }
 
   field_type "forecast" {

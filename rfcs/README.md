@@ -28,3 +28,10 @@ not introduce undocumented language behavior.
 
 - [RFC 0003: Hotspot Resolution](0003-hotspot-resolution.md) — proposed optional
   answer text, independent of the existing open/resolved status.
+
+## Accepted
+
+- [RFC 0004: Uncoupled Authoring Controls](0004-uncoupled-authoring-controls.md)
+  — accepted in v0.5.0: explicit field bindings, a partial board, chapter
+  membership sets, layout-free files, literal titles, policy separate from the
+  IR, and `translation` merged into `automation`.

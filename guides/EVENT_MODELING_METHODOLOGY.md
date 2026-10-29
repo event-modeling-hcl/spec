@@ -414,6 +414,8 @@ TRANSLATION    EXTERNAL EVENT → TODO-LIST READ MODEL → TRANSLATION AUTOMATIO
 
 An "internal" slice may legitimately have no screen (e.g. automation-only); don't flag a missing screen if the slice is intentionally internal.
 
+In Event Modeling HCL (`.em.hcl`, v0.5.0) the four patterns map to three workflow keywords: `state_change`, `state_view`, and `automation`. A translation is written as an `automation` whose input event belongs to a bounded context with `external = true`; there is no separate `translation` keyword.
+
 ### 4.3 Valid transitions between slices
 
 - state-view → state-change
