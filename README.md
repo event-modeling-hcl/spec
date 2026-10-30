@@ -4,7 +4,7 @@ The authoritative specification for Event Modeling HCL v0.5.0, a native HCL
 language for expressing Event Modeling workflows as validated source files.
 
 This repository defines the language. The [Go implementation](https://github.com/event-modeling-hcl/eventmodeling-hcl)
-provides the `eventmodeling-hcl` validator, formatter, and typed IR that enforce
+provides the `emhcl` validator, formatter, and typed IR that enforce
 and consume it.
 
 ## Start Here
@@ -14,7 +14,7 @@ and consume it.
 - [Learning guide](guides/learning-event-modeling-hcl.md): practice-first
   material for learning Event Modeling while authoring `.em.hcl`.
 - Migration guides: [v0.4.0 to v0.5.0](guides/migrating-v0.4.md) with
-  `eventmodeling-hcl migrate`, and [older models to v0.2.0](guides/migrating-v0.2.md).
+  `emhcl migrate`, and [older models to v0.2.0](guides/migrating-v0.2.md).
 - [Decision records](adrs/README.md): historical language-design decisions.
 - [Examples](examples/README.md): complete, independently valid models for the
   three workflow patterns, a translation, and a combined appointment/weather
@@ -29,8 +29,8 @@ and consume it.
 Install the CLI from the implementation repository, then run:
 
 ```text
-eventmodeling-hcl fmt -w examples/state-change.em.hcl
-eventmodeling-hcl validate examples/state-change.em.hcl
+emhcl fmt -w examples/state-change.em.hcl
+emhcl validate examples/state-change.em.hcl
 ```
 
 The specification is licensed under [Apache-2.0](LICENSE). Event Modeling

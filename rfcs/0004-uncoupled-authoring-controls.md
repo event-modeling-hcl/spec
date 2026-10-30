@@ -15,11 +15,12 @@ Uncoupled means that each control changes only its own outcome.
 The proposal gives field binding, board order, chapter membership, file layout,
 judgment policy, titles, workflow patterns, contract origin, output order, and
 workshop records separate controls.
-Every sibling design matrix in section 6 is diagonal.
+Selected authoring projections are diagonal within the range in section 6.2.
+The complete semantic pipeline remains decoupled, not fully uncoupled.
 
 The current rules connect these outcomes in several places.
 The evidence comes from the [current analysis](../axiomatic-design-analysis.md)
-and the [v0.4.0 specification](../eventmodeling.hclspec.md):
+and the [v0.4.0 specification](https://github.com/event-modeling-hcl/spec/blob/v0.4.0/eventmodeling.hclspec.md):
 
 | Current rule | Unwanted effect | Proposed replacement |
 | --- | --- | --- |
@@ -616,15 +617,13 @@ Scenario targets and counts still depend on the workflow keyword.
 Examples still conform to the referenced field type and cardinality.
 Wrong-kind and unresolved references remain errors.
 
-These rules are not dependencies between sibling controls.
 Reference, type, and example agreement are parts of FR1.
-FR1 is one leaf with one mechanism, the qualified namespace.
 Pattern, edge, and scenario agreement are parts of FR7.
-The workflow keyword is the parent control of FR7, and it selects the grammar
-for its children.
-A keyword change replaces that parent for one workflow. Its children are then
-checked again under the new grammar.
-Section 6.3 gives both structures.
+Those boundaries assign responsibility; they do not erase influences.
+Changing a declaration can require repairs to its uses in boards, chapters,
+edges and scenarios. Changing the workflow keyword can invalidate its elements
+and scenarios. Section 6 records these dependencies rather than counting the
+repairs as part of an allegedly independent edit.
 
 ## 3. Compatibility and Migration
 
@@ -753,7 +752,7 @@ Fixing an invalid model is author work, not an automatic retry loop.
 | Off-board set | S | Declared workflows minus the board list, sorted by ID. Neither input changes. |
 | Boundary marks | S | Each event-sourced edge (FR7) carries the origin of its source contract (FR8). Neither input changes. |
 | Accepted projections, then IR assembly | C | Publish one complete result, never a partial semantic model. |
-| IR and judgment signals, then severity, then policy status | C | The profile maps each signal to a severity. Any error severity rejects policy. Policy reads the current result and cannot gate its construction. |
+| Core result and judgment signals, then severity, then policy status | C | The profile maps each signal to a severity. Any error severity rejects policy. This mapping cannot gate IR construction; severity evaluation need not wait for lowering. |
 | Board order and chapter sets in a view | S | Show both without changing either stored outcome. |
 
 The off-board set, the boundary marks, and policy status are combined
@@ -1082,95 +1081,77 @@ This rectangular matrix illustrates shared controls.
 It does not by itself classify the full current design.
 The rest of section 6 describes the proposed design only.
 
-### 6.2 Level 1: Uncoupled Controls
+### 6.2 Local Authoring Independence and Semantic Dependencies
 
-The matrix uses the authoring reading of the method.
-A DP is the construct that an author edits, together with the rule that reads
-it.
-A cell asks: does an accepted edit of DP_j change the outcome of FR_i?
+The local matrix concerns stored projections for a fixed declaration namespace,
+workflow grammar and judgment-signal set. Board edits permute existing entries;
+chapter edits preserve existing valid references and exclusive membership;
+layout edits move whole blocks without changing member discovery.
+The source tree is a consistent snapshot during each load.
+These are local operating bounds, not a whole-language independence proof.
 
-The range bounds every cell:
+| Outcome | DP2 board | DP3 chapters | DP4 layout | DP5 profile | DP6 titles |
+| --- | --- | --- | --- | --- | --- |
+| FR2 story sequence | X | 0 | 0 | 0 | 0 |
+| FR3 membership sets | 0 | X | 0 | 0 | 0 |
+| FR4 physical placement | 0 | 0 | X | 0 | 0 |
+| FR5 severity mapping | 0 | 0 | 0 | X | 0 |
+| FR6 literal title presence and text | 0 | 0 | 0 | 0 | X |
 
-- Each edit is accepted: it satisfies its own contract.
-  A board edit lists existing workflows without repeats.
-  A file edit keeps the same member declarations and internal sequences.
-  A chapter edit preserves valid references and exclusive membership.
-- A rename or removal includes the repair of every use of the name.
-  References in boards, chapters, hotspots, edges, and scenarios are uses of
-  DP1. A rename edits that text, but each list keeps the same element at the
-  same position.
-- The language vocabulary is fixed.
-  Adding a block kind or attribute to the language is a language revision.
-  It needs a formatter slot (analysis, branch FR8) and is outside this range.
-- The source tree is a consistent snapshot during a load.
-- Malformed syntax is outside the range. Section 6.4 covers failures.
+This local mapping is uncoupled. Its zeros follow from explicit ownership:
+the board reads no chapter or file order; chapters write membership only;
+layout cannot change content; profiles cannot mutate or suppress the core IR;
+titles cannot rewrite identity. The smell rules read edges and scenario
+placement, not board position.
 
-These are bounds on valid edits, not a removal of FR1 or FR7.
-An edit outside the bounds fails under FR1 or FR7, and it is reported there.
+Two other influences have genuinely been removed: adding an unreferenced
+same-short-name type no longer changes existing field bindings, and changing
+a context's `external` flag no longer changes automation validity.
+The off-board set still depends on both declarations and the board.
+Boundary marks still depend on both edges and contract origin.
+Policy acceptance still depends on both judgment signals and the profile.
+Calling these outputs junctions does not remove those dependencies.
 
-| Outcome | DP1 namespace | DP2 board | DP3 chapters | DP4 layout | DP5 profile | DP6 titles | DP7 pattern grammar | DP8 origin flag | DP9 order rules | DP10 workshop records |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| FR1 typed integrity | X | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| FR2 board story | 0 | X | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| FR3 grouping | 0 | 0 | X | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| FR4 layout | 0 | 0 | 0 | X | 0 | 0 | 0 | 0 | 0 | 0 |
-| FR5 policy | 0 | 0 | 0 | 0 | X | 0 | 0 | 0 | 0 | 0 |
-| FR6 titles | 0 | 0 | 0 | 0 | 0 | X | 0 | 0 | 0 | 0 |
-| FR7 pattern behavior | 0 | 0 | 0 | 0 | 0 | 0 | X | 0 | 0 | 0 |
-| FR8 contract origin | 0 | 0 | 0 | 0 | 0 | 0 | 0 | X | 0 | 0 |
-| FR9 determinism | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | X | 0 |
-| FR10 workshop records | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | X |
+The full semantic mapping cannot use the previous diagonal argument.
+In particular, an identity rename is one upstream change, not a rename plus
+all dependent repairs treated as one independent DP. The following
+cross-branch influence table retains those effects:
 
-This matrix is uncoupled under the stated range.
-There is no required order for these edits.
-Each zero follows from an enforceable rule:
+| Outcome | DP1 declarations and typed binding | DP7 pattern grammar | DP2 board | DP3 chapters |
+| --- | --- | --- | --- | --- |
+| FR1 unique typed references and conforming literals | X | 0 | 0 | 0 |
+| FR7 pattern-correct elements, edges and scenarios | X | X | 0 | 0 |
+| FR2 valid board selection and story order | X | 0 | X | 0 |
+| FR3 valid chapter memberships | X | 0 | 0 | X |
 
-- DP1 resolves by exact lookup. It cannot search unrelated names, so catalog
-  growth changes no binding. A rename keeps every list position (range).
-  Pattern rules check edge kinds, and a rename keeps kinds.
-- DP2 is read only by board projection. It cannot rewrite chapter membership,
-  source layout, or flow. The smell signals read edges and scenario placement,
-  not board position [Code, `internal/validator/smells.go`].
-- DP3 cannot replace the board list or produce coverage diagnostics.
-  `EM407` is retired.
-- DP4 cannot contribute any semantic ordering between top-level blocks.
-  One-file and folder models use identical rules, so `EM006` and `EM013` are
-  retired.
-- DP5 has read-only access to signals. It runs after IR assembly and cannot
-  gate it.
-- DP6 cannot rewrite identity or reference values. No rule reads a title.
-- DP7 rules read element kinds, edges, and scenario steps. They read no origin
-  flag, board, chapter, title, or file. A new workflow is off-board, so the
-  story sequence stays the same.
-- DP8 is read by no acceptance rule. `EM011` and `EM012` are retired.
-  Only the boundary-mark junction reads it.
-- DP9 sets whitespace, attribute order, and sort keys. It changes no content.
-- DP10 records add no edges, scenarios, order, or membership.
-  A hotspot attachment is a DP1 use.
+This semantic mapping is lower triangular: establish declarations and binding,
+then validate pattern, board and chapter projections. A declaration rename or
+removal requires rebinding its uses; a referenced type change requires
+rechecking literals; a pattern change requires rechecking elements and
+scenarios. The later projections cannot modify the upstream declarations.
+Complete IR publication additionally depends on every core projection passing.
+Profile severity does not gate publication.
 
-FR4 measures physical placement only.
-Its source diagnostic locations change with placement, as its criterion permits.
-FR5 measures the profile mapping.
-Judgment signals change when their own inputs change. For example, resolving
-a hotspot removes `EM406`.
-That edit is a DP10 edit, and policy status is a combined outcome (section 4.5).
+No full-system diagonal classification is established by this RFC. The
+architecture preserves semantic correctness and local authoring independence;
+it does not weaken typed references or pattern-specific scenarios to make a
+matrix diagonal.
 
 ### 6.3 Level 2: Branches
 
-Each branch below is either a leaf or a diagonal sibling set.
+The branches below assign responsibilities. Their internal and cross-branch
+dependencies remain part of the influence model.
 
 **FR1 is a leaf.**
 Its parts are unique declarations, exact lookup, required types, and literal
 checks. They form one keyed table that one binder reads.
 A split into children would pair a declaration with its uses.
 For example, a rule for literal conformance depends on the bound type.
-Such a split gives a triangular matrix.
-This RFC therefore does not split FR1.
-The diagonal claim rests on this leaf boundary.
-The cost is visible: a declaration edit can need repairs in many places, and
-each repair stays inside FR1.
-The leaf is clear at this level: the binding module, its owned state, its
-errors, and its acceptance rows in section 5.3 are defined.
+Such a split gives a triangular matrix. Keeping FR1 as a leaf contains that
+dependency but does not make its internal controls uncoupled.
+Its binding module, owned state, errors and acceptance scenarios define the
+architectural boundary; the whole-system claim does not depend on hiding its
+internal structure.
 
 **FR7 has a parent control and three children.**
 The workflow keyword (DP7) selects one pattern grammar.
@@ -1188,7 +1169,8 @@ The children are derived inside the selected grammar:
 | FR7.2 | 0 | X | 0 |
 | FR7.3 | 0 | 0 | X |
 
-This matrix is uncoupled for a selected pattern:
+This matrix describes content edits with the pattern, identities, and
+referenced targets fixed; it does not classify changes to the pattern grammar.
 
 - Adding an element adds no edge and no scenario step.
 - Edge rules check the spelling for a pair of element kinds. Scenarios add no
@@ -1198,19 +1180,19 @@ This matrix is uncoupled for a selected pattern:
   `internal/validator/scenarios.go`].
   A scenario target must resolve, and that is a DP1 use.
 
-A keyword change is not an edit inside this matrix.
-It replaces the parent control for one workflow.
-Its children are then derived again under the new grammar.
-This is the zigzag step of the method, not coupling between siblings.
-Before this RFC, the `external` flag also influenced FR7, through `EM011` and
-`EM012`. Section 2.7 removes that influence.
+A keyword change requires rechecking elements, edges and scenarios.
+Zigzag decomposition explains how those child requirements are derived, but it
+does not make the change independent of the child outcomes. Those influences
+remain visible in section 6.2.
+The `external` flag no longer influences pattern validity through
+`EM011`/`EM012`; section 2.7 removes that specific influence.
 
 **FR5 has two children.**
 
 | FR | Outcome | DP |
 | --- | --- | --- |
 | FR5.1 | Each judgment signal has the severity that the profile states. | DP5.1: the profile severity map |
-| FR5.2 | The profile never changes core validity or the IR. | DP5.2: policy runs after IR assembly, with read-only access |
+| FR5.2 | The profile never changes core validity or the IR. | DP5.2: read-only severity mapping and a core-only construction gate |
 
 | | DP5.1 | DP5.2 |
 | --- | --- | --- |
@@ -1250,20 +1232,20 @@ These shared items connect branches:
 
 | Shared item | Owner | Who reads it | Effect on other FRs |
 | --- | --- | --- | --- |
-| Global ID spaces | FR1 | Every branch that names an element | None for accepted edits. A rename keeps list positions (section 6.2). |
-| The one `board` block | FR2 | Board projection, off-board junction | None. The off-board set is a combined outcome. |
-| The declaration union | FR4 | Binding | Layout cannot change content. Duplicates fail under FR1. |
-| Event-sourced edges and origin flags | FR7, FR8 | Boundary-mark junction | None. The junction writes nothing back. |
-| Judgment signals | FR7, FR10 | Policy evaluator | None. Severity and status are combined outcomes. |
-| The core-failure gate | IR assembly | Every consumer | Fault propagation, described below. |
+| Global ID spaces | FR1 | Every branch that names an element | A rename or removal can invalidate references in multiple branches. |
+| The one `board` block | FR2 | Board projection, off-board junction | Story order changes; off-board membership changes when selection changes. |
+| The declaration union | FR4 | Binding | Pure layout edits preserve content; discovery or duplicate changes can invalidate the model. |
+| Event-sourced edges and origin flags | FR7, FR8 | Boundary-mark junction | Both inputs affect derived marks and the displayed translation pattern. |
+| Judgment signals | FR7, FR10 | Policy evaluator | Content changes affect policy acceptance even with the profile fixed. |
+| The core-failure gate | IR assembly | Every consumer | Publication depends on every core branch accepting the snapshot. |
 
 A dangling hotspot attachment remains a reference error.
 An invalid title remains a syntax or attribute error.
 Duplicate identities across files still reject the union.
-These failures can block the whole model, despite independent valid edits.
-This is fault propagation, not functional coupling.
-An accepted edit of one DP still changes only its own FR.
-A rejected edit of any DP prevents publication of all FRs together.
+These failures block publication of the whole model. The semantic dependencies
+above are real functional influences; shared parser, I/O or resource failures
+are additional failure propagation. Independent stored projections do not
+establish independently available outputs.
 
 The proposed snapshot prevents mixing successful projections from different
 loads. It does not define an atomic read across files that other processes edit.
@@ -1294,7 +1276,7 @@ The diagonal matrix is not a fault-isolation claim.
 | Merge `translation` into `automation` and derive a boundary mark. | Meets FR7 and FR8 independently. Removes a keyword from the source. Selected. |
 | Separate profiles but still gate the IR with policy errors. | Renames responsibilities without removing the FR5 side effect. |
 | Remove typed references and pattern rules. | Can erase matrix entries, but fails FR1 and FR7 and weakens N7. Rejected. |
-| Split FR1 into declaration, lookup, type, and literal children. | Each child pairs a declaration with its uses, so the child matrix is triangular. Not selected. FR1 stays a leaf. |
+| Split FR1 into declaration, lookup, type, and literal children. | Exposes the internal triangular mapping. Keeping one leaf is a responsibility boundary, not an independence improvement. |
 
 The explicit controls are the selected candidate.
 The recommendation is provisional on author effort, reader comprehension, and
@@ -1303,11 +1285,11 @@ It is not a numerical Information Axiom result.
 
 ### 6.6 Change Scenarios
 
-Section 5.3 varies each DP at least once.
-Each row predicts that one FR changes and that all other normalized fields
-match.
-A failure of any row is evidence of an influence that the matrix omits.
-The matrix must then be corrected. A test must not hide the result.
+Section 5.3 contains both local independence scenarios and semantic rejection
+scenarios. Local tests compare unchanged projections within the range in
+section 6.2. Rejection and parent-pattern scenarios exercise the retained
+dependencies; they are not diagonal evidence. A counterexample must correct
+the matrix rather than be excluded by requiring dependent repairs first.
 
 ### 6.7 Information Axiom and Evidence Limits
 

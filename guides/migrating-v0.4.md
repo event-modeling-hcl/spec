@@ -15,16 +15,16 @@ without changing its meaning. First run it without `-w`. It prints the result
 and changes no file:
 
 ```bash
-eventmodeling-hcl migrate path/to/model.em.hcl
+emhcl migrate path/to/model.em.hcl
 ```
 
 Review the output. When it is correct, run it again with `-w`. It rewrites the
 changed files:
 
 ```bash
-eventmodeling-hcl migrate -w path/to/model.em.hcl
-eventmodeling-hcl fmt -w path/to/model.em.hcl
-eventmodeling-hcl validate path/to/model.em.hcl
+emhcl migrate -w path/to/model.em.hcl
+emhcl fmt -w path/to/model.em.hcl
+emhcl validate path/to/model.em.hcl
 ```
 
 For a folder model, give the folder path to `migrate` and `validate`, and run
@@ -66,6 +66,9 @@ input under v0.4.0 rules, then run it again.
   consumes no external event, or an `automation` that consumes one, was
   invalid in v0.4.0 (`EM011`, `EM012`). Fix the keyword or the `external` flag
   under v0.4.0 first.
+- **A chapter breaks v0.4.0 rules.** In a one-file model, its list must be
+  contiguous and in workflow source order (`EM006`). In a folder, all chapters
+  must live in one member file (`EM013`). Fix these under v0.4.0 before migrating.
 
 ## 4. Diagnostics That Disappear
 

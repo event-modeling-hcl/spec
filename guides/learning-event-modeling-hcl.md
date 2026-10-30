@@ -1192,15 +1192,15 @@ The validator rejects problems such as:
 Run the default `valid` profile:
 
 ```text
-eventmodeling-hcl validate my-model.em.hcl
+emhcl validate my-model.em.hcl
 ```
 
 Or choose explicitly:
 
 ```text
-eventmodeling-hcl validate --profile workshop my-model.em.hcl
-eventmodeling-hcl validate --profile valid my-model.em.hcl
-eventmodeling-hcl validate --profile strict my-model.em.hcl
+emhcl validate --profile workshop my-model.em.hcl
+emhcl validate --profile valid my-model.em.hcl
+emhcl validate --profile strict my-model.em.hcl
 ```
 
 Diagnostics use stable `EMxxx` codes: `EM0xx` structural, `EM1xx` references, `EM2xx` flow, `EM3xx` scenarios, and `EM4xx` modeling judgment. Treat diagnostics as part of the authoring loop, not a final ceremony.
@@ -1210,7 +1210,7 @@ Core diagnostics (`EM000` to `EM303`) are errors in every profile, and any of th
 After validation, canonicalize the source:
 
 ```text
-eventmodeling-hcl fmt -w my-model.em.hcl
+emhcl fmt -w my-model.em.hcl
 ```
 
 Formatting normalizes whitespace and attribute order but preserves semantically meaningful block and scenario order.
@@ -1381,14 +1381,14 @@ Happy path first, then business-rule failures.
 ### Step 10 — Format and validate
 
 ```text
-eventmodeling-hcl fmt -w my-model.em.hcl
-eventmodeling-hcl validate my-model.em.hcl
+emhcl fmt -w my-model.em.hcl
+emhcl validate my-model.em.hcl
 ```
 
 Before handing the model to a software-generating agent, also run:
 
 ```text
-eventmodeling-hcl validate --profile strict my-model.em.hcl
+emhcl validate --profile strict my-model.em.hcl
 ```
 
 ### Step 11 — Review smells
@@ -1750,7 +1750,7 @@ Rotate:
 Run:
 
 ```text
-eventmodeling-hcl validate practice.em.hcl
+emhcl validate practice.em.hcl
 ```
 
 Do not immediately patch errors blindly. First predict why the validator complained.
@@ -1846,7 +1846,7 @@ The current specification explicitly does **not** provide:
 
 That matters when designing repository tooling. A folder is one model, and its IDs are global. If you need two models, use two folders. A reference cannot point from one folder model into another.
 
-To move a v0.4.0 model to v0.5.0, run `eventmodeling-hcl migrate`. See [Migrating to v0.5.0](migrating-v0.4.md).
+To move a v0.4.0 model to v0.5.0, run `emhcl migrate`. See [Migrating to v0.5.0](migrating-v0.4.md).
 
 ---
 
@@ -2109,9 +2109,9 @@ HCL RULES TO REMEMBER
 - A Translation consumes an external Event; it is written as `automation`.
 - Unknowns become hotspots.
 - Exactly one board { workflows = [...] } sets story order. Omitted workflows are off-board. Files and chapters never order the model.
-- Format: eventmodeling-hcl fmt -w <model.em.hcl>
-- Validate: eventmodeling-hcl validate [--profile workshop|valid|strict] <model.em.hcl | folder>
-- Migrate a v0.4.0 model: eventmodeling-hcl migrate [-w] <model.em.hcl | folder>
+- Format: emhcl fmt -w <model.em.hcl>
+- Validate: emhcl validate [--profile workshop|valid|strict] <model.em.hcl | folder>
+- Migrate a v0.4.0 model: emhcl migrate [-w] <model.em.hcl | folder>
 
 MOST USEFUL QUESTION
 What happens next?

@@ -26,9 +26,9 @@ profile never decides whether tools receive a model. Migrate a v0.4.0 model
 with `migrate` (see Compatibility).
 
 ```text
-eventmodeling-hcl validate [--profile workshop|valid|strict] <model.em.hcl | folder>
-eventmodeling-hcl fmt [-w] <model.em.hcl>
-eventmodeling-hcl migrate [-w] <model.em.hcl | folder>
+emhcl validate [--profile workshop|valid|strict] <model.em.hcl | folder>
+emhcl fmt [-w] <model.em.hcl>
+emhcl migrate [-w] <model.em.hcl | folder>
 ```
 
 ## Language Principles
@@ -157,6 +157,8 @@ typed model never derives one from the label, and the formatter never writes
 one. A consumer shows the identity separately from the optional title. When a
 title is absent it may show the identity, but it must not present that
 identity as stored title text.
+The literal empty string is a present title, not an omitted title. The IR must
+preserve that distinction.
 
 `readmodel.question`, `actor.auth_required`, hotspot `question`, board and
 chapter `workflows`, and the `type` of every `field_type`, `field`, and
@@ -409,10 +411,12 @@ v0.4.0-valid model and rewrites it without changing its meaning:
 
 `migrate` stops with diagnostics, and writes nothing, when the input does not
 parse, already has a board, has a typeless field that v0.4.0 could not resolve
-uniquely, or violates the v0.4.0 translation rules. It validates its output
-under v0.5.0 rules. Without `-w` it prints the result; with `-w` it rewrites the
-changed files. `EM006`, `EM011`, `EM012`, `EM013`, and `EM407` disappear by
-design.
+uniquely, violates the v0.4.0 translation rules, or violates the old chapter
+rules (one-file contiguous source order and one chapter file per folder).
+It validates its output under v0.5.0 rules. Without `-w` it prints the result;
+with `-w` it rewrites the changed files. `EM006`, `EM011`, `EM012`, `EM013`,
+and `EM407` disappear from v0.5.0 validation, but migration still rejects
+inputs that violate v0.4.0 core rules.
 
 This language does not define cross-folder references, modules, JSON
 conversion, context maps, or inferred causality.

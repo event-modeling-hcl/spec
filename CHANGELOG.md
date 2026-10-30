@@ -4,6 +4,15 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- Current tooling instructions use the shipped `emhcl` executable.
+- Clarified that an explicit empty title differs from omission, and that
+  migration rejects the retired v0.4.0 chapter-rule violations.
+- Corrected RFC 0004's independence assessment: selected authoring controls
+  are locally diagonal; semantic reference and validation dependencies remain
+  decoupled. Regrouping requirements is not a global independence proof.
+
 ### Proposals
 
 - [RFC 0003](rfcs/0003-hotspot-resolution.md) proposes an optional hotspot

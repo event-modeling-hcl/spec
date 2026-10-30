@@ -17,8 +17,8 @@ appointment/weather model to see patterns composed in one domain.
 Format and validate any example with:
 
 ```text
-eventmodeling-hcl fmt -w examples/<name>.em.hcl
-eventmodeling-hcl validate examples/<name>.em.hcl
+emhcl fmt -w examples/<name>.em.hcl
+emhcl validate examples/<name>.em.hcl
 ```
 
-A folder is one model. Validate it with `eventmodeling-hcl validate examples/appointment-weather-split/`.
+A folder is one model. Validate it with `emhcl validate examples/appointment-weather-split/`.
