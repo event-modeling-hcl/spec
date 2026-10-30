@@ -4,22 +4,13 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
-### Fixed
-
-- Current tooling instructions use the shipped `emhcl` executable.
-- Clarified that an explicit empty title differs from omission, and that
-  migration rejects the retired v0.4.0 chapter-rule violations.
-- Corrected RFC 0004's independence assessment: selected authoring controls
-  are locally diagonal; semantic reference and validation dependencies remain
-  decoupled. Regrouping requirements is not a global independence proof.
-
 ### Proposals
 
 - [RFC 0003](rfcs/0003-hotspot-resolution.md) proposes an optional hotspot
   `resolution` string, independent of status, to preserve answers and reopened
   decisions. It is not part of the released language.
 
-## [v0.5.0] - 2026-10-29
+## [v0.5.0] - 2026-10-30
 
 v0.5.0 is a breaking revision (RFC 0004, Uncoupled Authoring Controls). Each
 authoring concern has its own control. A v0.4.0 model does not load under
@@ -66,6 +57,15 @@ v0.5.0 rules; `migrate` converts it without changing its meaning.
 - `EM006` (chapter source-order range), `EM011` and `EM012` (translation and
   automation externality), `EM013` (chapters in several files), and `EM407`
   (workflow outside every chapter). These codes are never reassigned.
+
+### Fixed
+
+- Current tooling instructions use the shipped `emhcl` executable.
+- Clarified that an explicit empty title differs from omission, and that
+  migration rejects the retired v0.4.0 chapter-rule violations.
+- Corrected RFC 0004's independence assessment: selected authoring controls
+  are locally diagonal; semantic reference and validation dependencies remain
+  decoupled. Regrouping requirements is not a global independence proof.
 
 ## [v0.4.0] - 2026-10-07
 
